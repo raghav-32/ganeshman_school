@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /includes/
+Disallow: /api/
+Disallow: /logout.php
+Disallow: /reset_password.php
+
+Sitemap: https://gms-sms.42web.io/sitemap.xml

@@ -1,0 +1,64 @@
+{
+    "hero": {
+        "tagline": "Knowledge · Integrity · Excellence",
+        "ctevt_text": "CTEVT Affiliated College"
+    },
+    "about": {
+        "title": "Building Tomorrow's Engineers in the Heart of Jhapa",
+        "text1": "Ganeshman Singh Academy (GMS) is a CTEVT affiliated technical college located in Jhiljhille, Jhapa, Nepal.",
+        "text2": "Each program spans six semesters combining strong theoretical foundations with hands-on, practical training."
+    },
+    "programs": {
+        "it_text": "A comprehensive 3-year Diploma program covering computer hardware, software development, networking, database systems, and emerging technologies.",
+        "civil_text": "A rigorous 3-year Diploma program encompassing structural engineering, surveying, construction management, AutoCAD, and material science.",
+        "structure_note": "Both diploma programs are affiliated with <strong style=\"color:var(--gold)\">CTEVT<\/strong> and consist of <strong>6 semesters<\/strong>, each of <strong>6 months<\/strong>."
+    },
+    "stats": {
+        "students": 6,
+        "teachers": 2
+    },
+    "contact": {
+        "address": "Jhiljhille, JhapaProvince No. 1, Nepal",
+        "email": "info@gms.edu.np",
+        "phone": "9708649359",
+        "website": "gms-sms.42web.io"
+    },
+    "cta": {
+        "title": "Ready to Start Your Engineering Journey?",
+        "text": "Contact us for admissions, fee structure, or to learn more about our Diploma programs."
+    },
+    "quote": {
+        "text": "The beautiful thing about learning is that nobody can take it away from you.",
+        "cite": "B.B. King"
+    },
+    "footer": {
+        "about": "A CTEVT affiliated technical college committed to producing skilled engineers in Jhiljhille, Jhapa, Nepal."
+    },
+    "ticker": [
+        "📢 Welcome to Ganeshman Singh Academy – CTEVT Affiliated College",
+        "Diploma in IT Engineering & Civil Engineering – 3 Years · 6 Semesters",
+        "Admissions Open – Contact us for fee structure & eligibility"
+    ],
+    "notices": [
+        {
+            "id": "cn_6a01cefaa84d0",
+            "title": "dgdgdfg",
+            "content": "dfgdfgdfg",
+            "date": "11 May 2026",
+            "target": "Urgent",
+            "author": "Administrator",
+            "image": null,
+            "source": "custom"
+        },
+        {
+            "id": "cn_6a01ca8208b34",
+            "title": "heyy",
+            "content": "hello",
+            "date": "11 May 2026",
+            "target": "Holiday",
+            "author": "Administrator",
+            "image": null,
+            "source": "custom"
+        }
+    ]
+}
