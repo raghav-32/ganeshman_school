@@ -24,10 +24,19 @@ Run the **v5 section at the bottom of `database.sql`** (creates `api_tokens`, `e
 ## Auth
 | Method | Endpoint | Body | Notes |
 |---|---|---|---|
+| GET | `auth/classes.php` | – | **Public.** Class list for the registration dropdown |
+| POST | `auth/register.php` | multipart form (see below) | **Public.** Student self-registration → admin approval queue. 201 on success |
 | POST | `auth/login.php` | `{username, password, device_name?}` | `username` = username **or** email. Returns `token`, `expires_at`, `role`, `profile` |
 | POST | `auth/logout.php` | – | Revokes this device's token |
 | GET | `auth/me.php` | – | Current profile (student or teacher) |
 | POST | `auth/change_password.php` | `{current_password, new_password}` | Min 6 chars. Signs out other devices |
+
+### Self-registration (`auth/register.php`)
+Same rules as the web `signup.php`, no token needed. The request lands in the admin's **Pending registrations**; the student can sign in only after approval (until then login answers `403` "pending approval").
+
+Send `multipart/form-data` (Retrofit `@Multipart`): `first_name, last_name, dob (YYYY-MM-DD), gender (Male|Female|Other), class_id, phone, email, address, guardian_name, guardian_phone, username (min 4), password (min 6), confirm_password` + optional `guardian_relation, admission_date` + **`photo`** (jpg/png/gif/webp, max 2 MB, required).
+Alternatively `application/json` with `photo_base64` instead of the file.
+Validation errors come back as `422` with a per-field `errors` object. The photo type is checked from the image bytes, not the file name. At most 30 registrations are accepted per hour in total (`429` after that).
 
 ## Student (`role = student`)
 | Method | Endpoint | Query / body |
