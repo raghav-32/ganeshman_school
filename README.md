@@ -212,7 +212,8 @@ http://localhost/ganeshman_school/
 
 ## 📞 Support Notes
 
-- **AJAX Attendance API:** `api/attendance.php` handles submit/get/summary
+- **AJAX Attendance API:** `api/attendance.php` handles submit/get/summary (web panel only)
+- **Mobile API (Android app):** `api/v1/` — student & teacher token API, see `api/v1/README.md`
 - **Grade Scale:** A+(90+), A(80+), B+(70+), B(60+), C+(50+), C(40+), D(35+), F(<35)
 - **Library Fine:** Rs 5 per day overdue
 - **Timetable Conflict:** System auto-checks teacher double-booking

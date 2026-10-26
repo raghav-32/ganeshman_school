@@ -1,0 +1,16 @@
+# Mobile API v1
+Options -Indexes
+
+# Many shared hosts (CGI/FastCGI) drop the Authorization header before PHP sees it.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# Internal include files must not be called directly
+<FilesMatch "^_">
+<IfModule mod_authz_core.c>
+Require all denied
+</IfModule>
+</FilesMatch>

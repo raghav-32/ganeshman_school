@@ -407,3 +407,35 @@ CREATE TABLE IF NOT EXISTS exam_schedule (
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE,
     UNIQUE KEY uq_exam_sub (exam_id, subject_id)
 ) ENGINE=InnoDB;
+
+-- ============================================================
+-- v5 SCHEMA ADDITIONS (run these if upgrading) — mobile API (api/v1)
+-- Token login for the Android app, plus two objects the web portal
+-- previously only created lazily at page-load time.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS api_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    device_name VARCHAR(100) DEFAULT NULL,
+    created_at DATETIME NOT NULL,
+    last_used_at DATETIME DEFAULT NULL,
+    expires_at DATETIME NOT NULL,
+    INDEX idx_api_tokens_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- "Publish results" flag used by admin/marks.php and student/results.php
+ALTER TABLE exams ADD COLUMN IF NOT EXISTS results_published TINYINT(1) NOT NULL DEFAULT 0 AFTER is_published;
+
+CREATE TABLE IF NOT EXISTS book_requests (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    student_id   INT NOT NULL,
+    book_id      INT NOT NULL,
+    request_date DATE NOT NULL,
+    status       ENUM('Pending','Issued','Cancelled') DEFAULT 'Pending',
+    note         VARCHAR(255) DEFAULT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id)    REFERENCES books(id)    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

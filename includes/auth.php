@@ -11,7 +11,8 @@ date_default_timezone_set('Asia/Kathmandu');
 require_once __DIR__ . '/config.php';
 
 // Start session safely
-if (session_status() === PHP_SESSION_NONE) {
+// (The mobile API under api/v1 defines API_NO_SESSION: it authenticates by token, not cookie.)
+if (!defined('API_NO_SESSION') && session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 86400,
         'path'     => '/',
