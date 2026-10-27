@@ -218,3 +218,5 @@ http://localhost/ganeshman_school/
 - **Library Fine:** Rs 5 per day overdue
 - **Timetable Conflict:** System auto-checks teacher double-booking
 - **Receipt Numbers:** Auto-generated unique codes (RCP + uniqid)
+
+**Android app:** native student/teacher app in [`android/`](android/README.md) (uses `api/v1`).
