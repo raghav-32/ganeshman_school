@@ -48,7 +48,8 @@ class Repository(val api: ApiClient, val session: Session) {
     }
 
     // ---- student ----
-    suspend fun studentDashboard(fresh: Boolean = false): StudentDashboard = api.get("student/dashboard", fresh = fresh)
+    suspend fun studentDashboard(fresh: Boolean = false): StudentDashboard =
+        api.get<StudentDashboard>("student/dashboard", fresh = fresh).also { session.markNoticesSeen(it.notices) }
     suspend fun studentAttendance(month: String): StudentAttendance = api.get("student/attendance", mapOf("month" to month))
     suspend fun results(): List<ResultExam> = api.get<ResultsList>("student/results").exams
     suspend fun resultDetail(examId: Int): ResultDetail =
@@ -56,7 +57,7 @@ class Repository(val api: ApiClient, val session: Session) {
     suspend fun studentExams(): List<ExamInfo> = api.get<ExamsData>("student/exams").exams
     suspend fun fees(): FeesData = api.get("student/fees")
     suspend fun timetable(): TimetableData = api.get("student/timetable")
-    suspend fun studentNotices(): List<Notice> = api.get<NoticesData>("student/notices", mapOf("limit" to 50)).notices
+    suspend fun studentNotices(): List<Notice> = noticesRaw(true, false).also { session.markNoticesSeen(it) }
     suspend fun library(q: String): LibraryData = api.get("student/library", mapOf("q" to q))
     suspend fun requestBook(bookId: Int) {
         api.post<JsonObject>("student/library_request", buildJsonObject { put("book_id", bookId) })
@@ -66,7 +67,8 @@ class Repository(val api: ApiClient, val session: Session) {
     }
 
     // ---- teacher ----
-    suspend fun teacherDashboard(fresh: Boolean = false): TeacherDashboard = api.get("teacher/dashboard", fresh = fresh)
+    suspend fun teacherDashboard(fresh: Boolean = false): TeacherDashboard =
+        api.get<TeacherDashboard>("teacher/dashboard", fresh = fresh).also { session.markNoticesSeen(it.notices) }
     suspend fun teacherClasses(): List<TeacherClass> = api.get<ClassesData>("teacher/classes").classes
     suspend fun classStudents(classId: Int): StudentsData = api.get("teacher/students", mapOf("class_id" to classId))
     suspend fun teacherAttendance(classId: Int, date: String): TeacherAttendance =
@@ -90,5 +92,9 @@ class Repository(val api: ApiClient, val session: Session) {
                 buildJsonObject { put("student_id", id); put("marks_obtained", JsonPrimitive(m)) }
             }))
         })
-    suspend fun teacherNotices(): List<Notice> = api.get<NoticesData>("teacher/notices", mapOf("limit" to 50)).notices
+    suspend fun teacherNotices(): List<Notice> = noticesRaw(false, false).also { session.markNoticesSeen(it) }
+
+    /** Notices without touching the "seen" marker (used by the background checker). */
+    suspend fun noticesRaw(student: Boolean, fresh: Boolean): List<Notice> =
+        api.get<NoticesData>(if (student) "student/notices" else "teacher/notices", mapOf("limit" to 50), fresh = fresh).notices
 }

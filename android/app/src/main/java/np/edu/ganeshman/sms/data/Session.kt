@@ -58,6 +58,18 @@ class Session(context: Context) {
         _data.value = cur.copy(profile = profile)
     }
 
+    /** Highest notice id the user has already seen/been notified about (-1 = unknown yet). */
+    var lastNoticeId: Int
+        get() = prefs.getInt("last_notice_id", -1)
+        set(v) { prefs.edit().putInt("last_notice_id", v).apply() }
+
+    /** Called whenever the app loads notices, so they are never notified twice. */
+    fun markNoticesSeen(notices: List<Notice>) {
+        val max = notices.maxOfOrNull { it.id }
+        if (max == null) { if (lastNoticeId < 0) lastNoticeId = 0; return }   // no notices yet: baseline 0
+        if (max > lastNoticeId) lastNoticeId = max
+    }
+
     fun clear() {
         prefs.edit().clear().apply()
         _data.value = null

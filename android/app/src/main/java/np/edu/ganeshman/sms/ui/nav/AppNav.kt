@@ -1,6 +1,12 @@
 package np.edu.ganeshman.sms.ui.nav
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.platform.LocalContext
+import np.edu.ganeshman.sms.notify.NoticeAlerts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
@@ -59,6 +65,20 @@ fun AppRoot() {
     val session by repo.session.data.collectAsState()
     val nav = rememberNavController()
     val fabHost = remember { FabHost() }
+
+    // Background notice checks + notification permission (Android 13+)
+    val ctx = LocalContext.current
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(session != null) {
+        if (session != null) {
+            NoticeAlerts.schedule(ctx)
+            if (Build.VERSION.SDK_INT >= 33 && !NoticeAlerts.canNotify(ctx)) {
+                permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            NoticeAlerts.cancel(ctx)
+        }
+    }
 
     val start = remember {
         when {
