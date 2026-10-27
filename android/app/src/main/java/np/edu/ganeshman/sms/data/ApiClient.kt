@@ -57,6 +57,12 @@ class ApiClient(private val session: Session) {
         .build()
 
     private val base = BuildConfig.API_BASE_URL.trimEnd('/') + "/"
+    /** Endpoints are real .php files, so we don't rely on the server's URL-rewrite rules. */
+    private fun endpoint(path: String): String {
+        val p = path.trim('/')
+        return base + if (p.endsWith(".php")) p else "$p.php"
+    }
+
     private val jsonMedia = "application/json; charset=utf-8".toMediaType()
 
     private class Cached(val at: Long, val value: JsonElement)
@@ -87,7 +93,7 @@ class ApiClient(private val session: Session) {
     // -------- raw layer (returns the envelope's "data") --------
 
     suspend fun rawGet(path: String, query: Map<String, Any?>, fresh: Boolean): JsonElement {
-        val url = base.plus(path.trimStart('/')).toHttpUrl().newBuilder().apply {
+        val url = endpoint(path).toHttpUrl().newBuilder().apply {
             query.forEach { (k, v) -> if (v != null && v.toString().isNotEmpty()) addQueryParameter(k, v.toString()) }
         }.build()
         val key = url.toString() + "|" + (session.token ?: "")
@@ -104,7 +110,7 @@ class ApiClient(private val session: Session) {
 
     suspend fun rawPost(path: String, body: JsonObject): JsonElement {
         val data = execute(
-            Request.Builder().url(base + path.trimStart('/'))
+            Request.Builder().url(endpoint(path))
                 .post(body.toString().toRequestBody(jsonMedia)),
             auth = path.authRequired(),
         )
@@ -124,7 +130,7 @@ class ApiClient(private val session: Session) {
         if (fileField != null && fileBytes != null) {
             mb.addFormDataPart(fileField, fileName, fileBytes.toRequestBody("image/jpeg".toMediaType()))
         }
-        return execute(Request.Builder().url(base + path.trimStart('/')).post(mb.build()), auth = false)
+        return execute(Request.Builder().url(endpoint(path)).post(mb.build()), auth = false)
     }
 
     // Public endpoints don't need (and shouldn't send) a token.
