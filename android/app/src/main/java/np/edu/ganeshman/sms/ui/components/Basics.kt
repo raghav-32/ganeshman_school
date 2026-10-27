@@ -28,6 +28,9 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.ui.focus.onFocusEvent
+import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -70,6 +73,7 @@ fun Screen(
             .fillMaxSize()
             .background(Canvas)
             .statusBarsPadding()
+            .imePadding()
     ) {
         Row(
             Modifier
@@ -291,12 +295,16 @@ fun Field(
     onClick: (() -> Unit)? = null,
 ) {
     var visible by remember { mutableStateOf(false) }
+    val bring = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+    val focusScope = rememberCoroutineScope()
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
         label = { Text(label) },
         modifier = modifier
             .fillMaxWidth()
+            .bringIntoViewRequester(bring)
+            .onFocusEvent { if (it.isFocused) focusScope.launch { kotlinx.coroutines.delay(350); bring.bringIntoView() } }
             .let { if (onClick != null) it.clickable(onClick = onClick) else it },
         singleLine = singleLine,
         readOnly = readOnly,

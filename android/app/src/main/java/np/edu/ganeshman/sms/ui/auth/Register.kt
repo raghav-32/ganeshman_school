@@ -1,6 +1,5 @@
 package np.edu.ganeshman.sms.ui.auth
 
-import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -34,6 +33,7 @@ import kotlinx.coroutines.withContext
 import np.edu.ganeshman.sms.data.ApiException
 import np.edu.ganeshman.sms.data.ClassOption
 import np.edu.ganeshman.sms.ui.common.LocalRepo
+import np.edu.ganeshman.sms.ui.common.NepaliDate
 import np.edu.ganeshman.sms.ui.common.iso
 import np.edu.ganeshman.sms.ui.common.prettyDate
 import np.edu.ganeshman.sms.ui.components.*
@@ -96,12 +96,8 @@ fun RegisterScreen(onBack: () -> Unit, onDone: () -> Unit) {
         }
     }
 
-    fun pickDob() {
-        val d = f["dob"]?.takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-            ?: LocalDate.now().minusYears(10)
-        DatePickerDialog(ctx, { _, y, m, day -> f["dob"] = LocalDate.of(y, m + 1, day).iso() },
-            d.year, d.monthValue - 1, d.dayOfMonth).show()
-    }
+    var dobOpen by remember { mutableStateOf(false) }
+    fun pickDob() { dobOpen = true }
 
     fun submit() {
         val local = mutableMapOf<String, String>()
@@ -153,7 +149,7 @@ fun RegisterScreen(onBack: () -> Unit, onDone: () -> Unit) {
                 else Icon(Icons.Outlined.AddAPhoto, "Add photo", tint = BrandDark, modifier = Modifier.size(32.dp))
             }
         }
-        Text("Photo (optional)", style = MaterialTheme.typography.bodySmall, color = InkSoft,
+        Text("Photo", style = MaterialTheme.typography.bodySmall, color = InkSoft,
             modifier = Modifier.align(Alignment.CenterHorizontally))
         errors["photo"]?.let { Text(it, color = Bad, style = MaterialTheme.typography.bodySmall) }
 
@@ -162,7 +158,8 @@ fun RegisterScreen(onBack: () -> Unit, onDone: () -> Unit) {
             tf("first_name", "First name")
             tf("last_name", "Last name")
             Field(
-                prettyDate(f["dob"]), {}, "Date of birth (AD)", error = errors["dob"], readOnly = true,
+                f["dob"]?.takeIf { it.isNotBlank() }?.let { runCatching { NepaliDate.format(LocalDate.parse(it)) }.getOrNull() } ?: "",
+                {}, "Date of birth (BS)", error = errors["dob"], readOnly = true,
                 trailing = { Icon(Icons.Outlined.CalendarMonth, null) }, onClick = ::pickDob,
             )
             Text("Gender", style = MaterialTheme.typography.labelLarge, color = InkSoft)
@@ -175,7 +172,7 @@ fun RegisterScreen(onBack: () -> Unit, onDone: () -> Unit) {
             }
             errors["class_id"]?.let { Text(it, color = Bad, style = MaterialTheme.typography.bodySmall) }
             tf("phone", "Phone", KeyboardType.Phone)
-            tf("email", "Email (optional)", KeyboardType.Email)
+            tf("email", "Email", KeyboardType.Email)
             tf("address", "Address")
         }
 
@@ -193,7 +190,78 @@ fun RegisterScreen(onBack: () -> Unit, onDone: () -> Unit) {
             tf("confirm_password", "Confirm password", pw = true)
         }
 
+        if (dobOpen) {
+            val init = f["dob"]?.takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                ?: LocalDate.now().minusYears(10)
+            BsDatePickerDialog(init, onDismiss = { dobOpen = false }) { f["dob"] = it.iso(); dobOpen = false }
+        }
+
         banner?.let { Text(it, color = Bad, style = MaterialTheme.typography.bodyMedium) }
         BigButton("Submit registration", ::submit, loading = loading)
+    }
+}
+
+/** Date picker in Bikram Sambat (BS). Returns the chosen day as an AD LocalDate (the server stores AD). */
+@Composable
+fun BsDatePickerDialog(initial: LocalDate, onDismiss: () -> Unit, onPick: (LocalDate) -> Unit) {
+    val start = NepaliDate.fromAd(initial) ?: Triple(2070, 1, 1)
+    var year by remember { mutableIntStateOf(start.first) }
+    var month by remember { mutableIntStateOf(start.second) }
+    var day by remember { mutableIntStateOf(start.third) }
+    val maxDay = NepaliDate.daysIn(year, month)
+    if (day > maxDay) day = maxDay
+    val todayBs = remember { NepaliDate.fromAd(LocalDate.now()) }
+    val maxYear = todayBs?.first ?: NepaliDate.endYear
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Surface,
+        title = { Text("Date of birth (BS)") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "%d %s %d BS  •  %s AD".format(day, NepaliDate.monthNames[month - 1], year,
+                        NepaliDate.toAd(year, month, day).let { prettyDate(it.iso()) }),
+                    style = MaterialTheme.typography.titleSmall, color = BrandDark,
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PickColumn("Year", (NepaliDate.START_YEAR..maxYear).toList().reversed(), year, { it.toString() }, Modifier.weight(1.1f)) { year = it }
+                    PickColumn("Month", (1..12).toList(), month, { NepaliDate.monthNames[it - 1] }, Modifier.weight(1.4f)) { month = it }
+                    PickColumn("Day", (1..maxDay).toList(), day, { it.toString() }, Modifier.weight(0.8f)) { day = it }
+                }
+            }
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = {
+                val ad = NepaliDate.toAd(year, month, day)
+                onPick(if (ad.isAfter(LocalDate.now())) LocalDate.now() else ad)
+            }) { Text("OK") }
+        },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
+@Composable
+private fun PickColumn(
+    label: String, items: List<Int>, selected: Int, text: (Int) -> String, modifier: Modifier, onSelect: (Int) -> Unit,
+) {
+    val state = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(Unit) { items.indexOf(selected).let { if (it > 1) state.scrollToItem(it - 1) } }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = InkSoft)
+        androidx.compose.foundation.lazy.LazyColumn(Modifier.height(200.dp), state = state) {
+            items(items.size) { i ->
+                val v = items[i]
+                val on = v == selected
+                Box(
+                    Modifier.fillMaxWidth().padding(vertical = 2.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                        .background(if (on) Brand else androidx.compose.ui.graphics.Color.Transparent)
+                        .clickable { onSelect(v) }.padding(vertical = 9.dp, horizontal = 6.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text(v), color = if (on) OnBrand else Ink, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                }
+            }
+        }
     }
 }
