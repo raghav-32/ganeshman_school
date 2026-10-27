@@ -112,11 +112,13 @@ fun AppRoot() {
         { nav.navigate(if (sd.isStudent) Routes.S_NOTICES else Routes.T_NOTICES) { launchSingleTop = true } }
     }
 
+    val openSettings: (() -> Unit)? = session?.let { { nav.navigate(Routes.SETTINGS) { launchSingleTop = true } } }
     val openSearch: (() -> Unit)? = session?.let { { nav.navigate(Routes.SEARCH) { launchSingleTop = true } } }
 
     CompositionLocalProvider(
         LocalFabHost provides fabHost, LocalOpenProfile provides openProfile,
         LocalOpenNotices provides openNotices, LocalOpenSearch provides openSearch,
+        LocalOpenSettings provides openSettings,
     ) {
         Box(Modifier.fillMaxSize()) {
             NavHost(nav, startDestination = start) {
@@ -182,23 +184,33 @@ fun AppRoot() {
             val s = session
             if (s != null && route != null && route !in authRoutes) {
                 val tabs = if (s.isStudent) studentTabs else teacherTabs
-                fabHost.spec?.let { spec ->
+                val spec = fabHost.spec
+                // Navigation pill bottom-left; the round plus button sits on the same row, bottom-right.
+                Row(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(start = 14.dp, end = 18.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PillNav(
+                        tabs, tabFor(route, s.isStudent),
+                        onSelect = { target -> goTab(nav, target, tabs.first().route) },
+                    )
+                    Spacer(Modifier.weight(1f))
+                    if (spec != null && spec.label == null) AppFab(spec)
+                }
+                // Wide "Save" buttons (attendance / marks) don't fit beside the nav: float them just above it.
+                if (spec != null && spec.label != null) {
                     AppFab(
                         spec,
                         Modifier
                             .align(Alignment.BottomEnd)
                             .navigationBarsPadding()
-                            .padding(end = 20.dp, bottom = 92.dp),
+                            .padding(end = 18.dp, bottom = 88.dp),
                     )
                 }
-                PillNav(
-                    tabs, tabFor(route, s.isStudent),
-                    onSelect = { target -> goTab(nav, target, tabs.first().route) },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(bottom = 12.dp),
-                )
             }
         }
     }

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
@@ -45,6 +46,9 @@ import np.edu.ganeshman.sms.ui.theme.*
 
 /** When set (top-level screens), a round profile picture is shown at the top right, like Gmail. */
 val LocalOpenProfile = staticCompositionLocalOf<(() -> Unit)?> { null }
+
+/** Opens Settings from the gear at the top right. */
+val LocalOpenSettings = staticCompositionLocalOf<(() -> Unit)?> { null }
 
 /** Opens the global search from the magnifier in the top bar. */
 val LocalOpenSearch = staticCompositionLocalOf<(() -> Unit)?> { null }
@@ -95,11 +99,12 @@ fun Screen(
             }
             actions()
             val openSearch = LocalOpenSearch.current
+            val openSettings = LocalOpenSettings.current
             val openNotices = LocalOpenNotices.current
             val openProfile = LocalOpenProfile.current
             if (onBack == null && openSearch != null) {
                 Box(
-                    Modifier.size(44.dp).clip(CircleShape).clickable(onClick = openSearch),
+                    Modifier.size(40.dp).clip(CircleShape).clickable(onClick = openSearch),
                     contentAlignment = Alignment.Center,
                 ) { Icon(Icons.Outlined.Search, contentDescription = "Search", tint = Ink) }
             }
@@ -107,21 +112,27 @@ fun Screen(
                 val repo = np.edu.ganeshman.sms.ui.common.LocalRepo.current
                 val unread by repo.session.hasUnread.collectAsState(initial = false)
                 Box(
-                    Modifier.size(44.dp).clip(CircleShape).clickable(onClick = openNotices),
+                    Modifier.size(40.dp).clip(CircleShape).clickable(onClick = openNotices),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(Icons.Outlined.Notifications, contentDescription = "Notices", tint = Ink)
                     if (unread) Box(
-                        Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 10.dp)
+                        Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)
                             .size(10.dp).clip(CircleShape).background(Bad)
                     )
                 }
             }
             if (onBack == null && openProfile != null) {
                 val me by np.edu.ganeshman.sms.ui.common.LocalRepo.current.session.data.collectAsState()
-                Box(Modifier.padding(start = 4.dp).clip(CircleShape).clickable(onClick = openProfile)) {
-                    Avatar(me?.profile?.fullName ?: "", me?.profile?.photoUrl, 40.dp)
+                Box(Modifier.padding(horizontal = 2.dp).clip(CircleShape).clickable(onClick = openProfile)) {
+                    Avatar(me?.profile?.fullName ?: "", me?.profile?.photoUrl, 34.dp)
                 }
+            }
+            if (onBack == null && openSettings != null) {
+                Box(
+                    Modifier.size(40.dp).clip(CircleShape).clickable(onClick = openSettings),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Ink) }
             }
         }
 

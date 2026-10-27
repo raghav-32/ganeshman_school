@@ -26,7 +26,7 @@ fun TeacherHome(nav: NavHostController) {
     val first = me?.profile?.firstName.orEmpty()
     Screen(
         refresh = state.reload,
-        title = if (first.isBlank()) greeting() else "${greeting()}, $first",
+        title = if (first.isBlank()) greeting() else "Hi, $first",
         subtitle = state.load.dataOrNull()?.today?.let { listOfNotNull(it.weekday.ifBlank { null }, it.dateBs).joinToString(" • ") },
     ) {
         AsyncContent(state, skeletons = 4) { d ->
@@ -49,9 +49,6 @@ fun TeacherHome(nav: NavHostController) {
                     }
                 }
             }
-            SectionTitle("Notices", "See all") { nav.navigate(Routes.T_NOTICES) }
-            if (d.notices.isEmpty()) EmptyState(Illustration.Notices, "No notices", "Announcements will show up here.")
-            else d.notices.take(3).forEach { NoticeCard(it) }
         }
     }
 

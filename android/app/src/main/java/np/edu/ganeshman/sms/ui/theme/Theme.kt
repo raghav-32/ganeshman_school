@@ -1,6 +1,7 @@
 package np.edu.ganeshman.sms.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
@@ -51,26 +52,10 @@ private val DarkColors = AppColors(
     soft = Color(0xFF242530), dark = true,
 )
 
-/** Slightly stronger contrast variants (Settings -> High contrast). */
-private fun AppColors.highContrast(): AppColors = AppColors(
-    canvas = canvas, surface = surface,
-    ink = if (dark) Color.White else Color.Black,
-    inkSoft = if (dark) Color(0xFFE0E1EC) else Color(0xFF2B2D3B),
-    line = if (dark) Color(0xFF6A6D80) else Color(0xFF8C8FA3),
-    brand = brand, brandDark = if (dark) Color.White else Color(0xFF2A2C8F), brandSoft = brandSoft, onBrand = onBrand,
-    pastelGreen = pastelGreen, pastelBlue = pastelBlue, pastelYellow = pastelYellow,
-    pastelPink = pastelPink, pastelLilac = pastelLilac, pastelPeach = pastelPeach,
-    onGreen = onGreen, onBlue = onBlue, onYellow = onYellow, onPink = onPink, onLilac = onLilac, onPeach = onPeach,
-    good = good, warn = warn, bad = bad, soft = soft, dark = dark,
-)
-
 /** The active palette. Changing it recomposes everything that read a colour below. */
 object Palette {
     var current by mutableStateOf(LightColors)
-    fun pick(dark: Boolean, highContrast: Boolean): AppColors {
-        val base = if (dark) DarkColors else LightColors
-        return if (highContrast) base.highContrast() else base
-    }
+    fun pick(dark: Boolean): AppColors = if (dark) DarkColors else LightColors
 }
 
 // Colour names are unchanged, so every screen keeps working; they now follow the palette.
@@ -147,9 +132,9 @@ private fun t(size: Int, weight: FontWeight, line: Int, spacing: Double = 0.0) =
     letterSpacing = spacing.sp,
 )
 
-private fun typography(bold: Boolean): Typography {
-    val body = if (bold) FontWeight.SemiBold else FontWeight.Normal
-    val label = if (bold) FontWeight.Bold else FontWeight.Medium
+private fun typography(): Typography {
+    val body = FontWeight.Normal
+    val label = FontWeight.Medium
     return Typography(
         headlineLarge = t(30, FontWeight.Bold, 38),
         headlineMedium = t(26, FontWeight.Bold, 34),
@@ -167,8 +152,11 @@ private fun typography(bold: Boolean): Typography {
 }
 
 @Composable
-fun GmsTheme(dark: Boolean, highContrast: Boolean = false, bold: Boolean = false, content: @Composable () -> Unit) {
-    val colors = remember(dark, highContrast) { Palette.pick(dark, highContrast) }
+fun GmsTheme(dark: Boolean, content: @Composable () -> Unit) {
+    val colors = remember(dark) { Palette.pick(dark) }
     SideEffect { if (Palette.current !== colors) Palette.current = colors }
-    MaterialTheme(colorScheme = scheme(colors), typography = typography(bold), shapes = shapes, content = content)
+    MaterialTheme(colorScheme = scheme(colors), typography = typography(), shapes = shapes) {
+        // Without this, plain Text/Icon default to BLACK, which disappears on the dark background.
+        CompositionLocalProvider(LocalContentColor provides colors.ink) { content() }
+    }
 }

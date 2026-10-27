@@ -28,7 +28,7 @@ fun StudentHome(nav: NavHostController) {
 
     val first = me?.profile?.firstName.orEmpty()
     Screen(
-        title = if (first.isBlank()) greeting() else "${greeting()}, $first",
+        title = if (first.isBlank()) greeting() else "Hi, $first",
         subtitle = me?.profile?.klass?.label,
         refresh = state.reload,
     ) {
@@ -84,11 +84,6 @@ fun StudentHome(nav: NavHostController) {
                     }
                 }
             }
-
-            SectionTitle("Notices", "See all") { nav.navigate(Routes.S_NOTICES) }
-            if (d.notices.isEmpty()) {
-                EmptyState(Illustration.Notices, "No notices", "New school announcements will show up here.")
-            } else d.notices.take(3).forEach { NoticeCard(it) }
         }
     }
 

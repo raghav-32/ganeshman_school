@@ -90,36 +90,15 @@ fun SettingsScreen(onBack: () -> Unit, onAbout: () -> Unit, onSignOut: () -> Uni
     val st = LocalSettings.current
     val scope = rememberCoroutineScope()
 
-    val theme by st.theme.collectAsState()
-    val scale by st.textScale.collectAsState()
-    val bold by st.bold.collectAsState()
-    val contrast by st.highContrast.collectAsState()
+    val dark by st.darkMode.collectAsState()
     val notif by st.notifications.collectAsState()
     var confirm by remember { mutableStateOf(false) }
     var cleared by remember { mutableStateOf(false) }
 
-    val themes = listOf("system" to "System", "light" to "Light", "dark" to "Dark")
-    val sizes = listOf(0.9f to "Small", 1f to "Default", 1.15f to "Large", 1.3f to "Extra large")
-
     Screen("Settings", onBack = onBack) {
         SectionTitle("Appearance")
-        Panel {
-            Text("Theme", style = MaterialTheme.typography.titleSmall)
-            PillSelector(themes.map { it.first }, theme, { k -> themes.first { it.first == k }.second }) { st.setTheme(it) }
-            Spacer(Modifier.height(6.dp))
-            Text("Text size", style = MaterialTheme.typography.titleSmall)
-            PillSelector(sizes.map { it.first }, sizes.minByOrNull { kotlin.math.abs(it.first - scale) }?.first, { v -> sizes.first { it.first == v }.second }) { st.setTextScale(it) }
-            Text(
-                "The quick brown fox jumps over the lazy dog.",
-                style = MaterialTheme.typography.bodyMedium, color = InkSoft,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
-
-        SectionTitle("Accessibility")
         Panel(padding = 4.dp) {
-            SwitchRow(Icons.Outlined.FormatBold, "Bold text", "Make all text heavier and easier to read", PastelLilac, OnLilac, bold) { st.setBold(it) }
-            SwitchRow(Icons.Outlined.Contrast, "High contrast", "Stronger text and border colours", PastelYellow, OnYellow, contrast) { st.setHighContrast(it) }
+            SwitchRow(Icons.Outlined.DarkMode, "Dark mode", "Easier on the eyes in low light", PastelLilac, OnLilac, dark) { st.setDarkMode(it) }
         }
 
         SectionTitle("Notifications")

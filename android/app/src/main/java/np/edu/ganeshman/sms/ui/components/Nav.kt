@@ -31,8 +31,8 @@ fun PillNav(items: List<NavItem>, selected: String, onSelect: (String) -> Unit, 
             .shadow(10.dp, CircleShape, ambientColor = Color(0x22000000), spotColor = Color(0x22000000))
             .clip(CircleShape)
             .background(Surface)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(horizontal = 6.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         items.forEach { item ->
@@ -43,17 +43,17 @@ fun PillNav(items: List<NavItem>, selected: String, onSelect: (String) -> Unit, 
                     .clip(CircleShape)
                     .background(bg)
                     .clickable { onSelect(item.route) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 10.dp, vertical = 11.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(item.icon, item.label, tint = if (on) BrandDark else InkSoft, modifier = Modifier.size(24.dp))
+                Icon(item.icon, item.label, tint = if (on) BrandDark else InkSoft, modifier = Modifier.size(22.dp))
                 AnimatedVisibility(on, enter = expandHorizontally(), exit = shrinkHorizontally()) {
                     Text(
                         item.label,
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.labelMedium,
                         color = BrandDark,
                         maxLines = 1,
-                        modifier = Modifier.padding(start = 8.dp),
+                        modifier = Modifier.padding(start = 6.dp),
                     )
                 }
             }
@@ -92,24 +92,27 @@ fun AppFab(spec: FabSpec, modifier: Modifier = Modifier) {
         ExtendedFloatingActionButton(
             onClick = { if (!spec.loading) spec.onClick() },
             modifier = modifier,
-            containerColor = Brand,
-            contentColor = OnBrand,
+            containerColor = BrandSoft,
+            contentColor = BrandDark,
             shape = CircleShape,
+            elevation = FloatingActionButtonDefaults.elevation(6.dp, 6.dp, 6.dp, 6.dp),
         ) {
-            if (spec.loading) CircularProgressIndicator(Modifier.size(20.dp), color = OnBrand, strokeWidth = 2.dp)
+            if (spec.loading) CircularProgressIndicator(Modifier.size(20.dp), color = BrandDark, strokeWidth = 2.dp)
             else Icon(spec.icon, null)
             Spacer(Modifier.width(8.dp))
             Text(spec.label, style = MaterialTheme.typography.labelLarge)
         }
     } else {
+        // Same look as the pill navigation: soft theme colour, round, same shadow.
         FloatingActionButton(
             onClick = spec.onClick,
-            modifier = modifier,
-            containerColor = Brand,
-            contentColor = OnBrand,
+            modifier = modifier.size(56.dp),
+            containerColor = BrandSoft,
+            contentColor = BrandDark,
             shape = CircleShape,
+            elevation = FloatingActionButtonDefaults.elevation(6.dp, 6.dp, 6.dp, 6.dp),
         ) {
-            Icon(spec.icon, null, modifier = Modifier.rotate(rot))
+            Icon(spec.icon, null, modifier = Modifier.size(28.dp).rotate(rot))
         }
     }
 }
