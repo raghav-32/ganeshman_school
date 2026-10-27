@@ -21,14 +21,26 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"https://gms-sms.42web.io/api/v1/\"")
     }
 
+    // One fixed signing key for every build (local or GitHub Actions). Android only allows
+    // updating an installed app when the new APK is signed with the SAME key.
+    signingConfigs {
+        create("gms") {
+            storeFile = file("gms-sign.jks")
+            storePassword = "gmsschool"
+            keyAlias = "gms"
+            keyPassword = "gmsschool"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("gms")
+        }
         release {
             // Not minified on purpose: the app is small, and shrinking can break
             // EncryptedSharedPreferences / serialization if keep rules drift.
             isMinifyEnabled = false
-            // Signed with the debug key so the release APK installs on your phone.
-            // Create a real keystore before publishing to the Play Store.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("gms")
         }
     }
 

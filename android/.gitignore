@@ -13,3 +13,4 @@ app/build/
 keystore.properties
 *.jks
 *.keystore
+!app/gms-sign.jks
