@@ -20,7 +20,7 @@ import np.edu.ganeshman.sms.ui.theme.*
 fun MarksListScreen(onOpen: (Int) -> Unit) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.teacherExams() }
-    Screen("Marks") {
+    Screen("Marks", refresh = state.reload) {
         AsyncContent(state) { exams ->
             if (exams.isEmpty()) {
                 EmptyState(Illustration.Results, "No exams", "Exams for your classes will appear here.")

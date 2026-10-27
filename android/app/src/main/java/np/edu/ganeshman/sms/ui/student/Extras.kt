@@ -30,7 +30,7 @@ fun TimetableScreen(onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.timetable() }
     var picked by remember { mutableStateOf<String?>(null) }
-    Screen("Timetable", onBack = onBack) {
+    Screen("Timetable", onBack = onBack, refresh = state.reload) {
         AsyncContent(state) { t ->
             if (t.days.isEmpty()) {
                 EmptyState(Illustration.Calendar, "No timetable", "Your class timetable hasn't been set up yet.")
@@ -242,7 +242,7 @@ fun LibraryScreen(onBack: () -> Unit) {
 fun StudentMore(nav: androidx.navigation.NavHostController) {
     MoreList(
         listOf(
-            MoreItem("My Attendance", "Overall and monthly", Icons.Outlined.EventAvailable, PastelGreen, OnGreen, Routes.S_ATT),
+            MoreItem("Notices", "School announcements", Icons.Outlined.Notifications, PastelGreen, OnGreen, Routes.S_NOTICES),
             MoreItem("My Results", "Published exam results", Icons.Outlined.EmojiEvents, PastelLilac, OnLilac, Routes.S_RESULTS),
             MoreItem("Exam Schedule", "Dates and subjects", Icons.Outlined.Quiz, PastelBlue, OnBlue, Routes.S_EXAMS),
             MoreItem("My Fees", "Dues and payments", Icons.Outlined.Payments, PastelYellow, OnYellow, Routes.S_FEES),

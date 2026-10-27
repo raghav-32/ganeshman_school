@@ -17,11 +17,13 @@ import np.edu.ganeshman.sms.ui.theme.*
 @Composable
 fun NoticesScreen(student: Boolean, onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
+    val viewedBefore = remember { repo.session.viewedNoticeId }   // notices newer than this are "New"
     val state = rememberAsync { if (student) repo.studentNotices() else repo.teacherNotices() }
-    Screen("Notices", onBack = onBack) {
+    LaunchedEffect(state.load is Load.Ready<*>) { if (state.load is Load.Ready<*>) repo.session.markNoticesViewed() }
+    Screen("Notices", onBack = onBack, refresh = state.reload) {
         AsyncContent(state) { list ->
             if (list.isEmpty()) EmptyState(Illustration.Notices, "No notices", "New school announcements will show up here.")
-            else list.forEach { NoticeCard(it) }
+            else list.forEach { NoticeCard(it, isNew = viewedBefore >= 0 && it.id > viewedBefore) }
         }
     }
 }

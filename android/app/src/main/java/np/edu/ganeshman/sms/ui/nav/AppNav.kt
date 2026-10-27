@@ -34,7 +34,7 @@ import np.edu.ganeshman.sms.ui.common.ProfileScreen
 private val studentTabs = listOf(
     NavItem(Routes.S_HOME, "Home", Icons.Outlined.Home),
     NavItem(Routes.S_TIMETABLE, "Timetable", Icons.Outlined.Schedule),
-    NavItem(Routes.S_NOTICES, "Notices", Icons.Outlined.Notifications),
+    NavItem(Routes.S_ATT, "Attendance", Icons.Outlined.EventAvailable),
     NavItem(Routes.S_MORE, "More", Icons.Outlined.Apps),
 )
 private val teacherTabs = listOf(
@@ -103,7 +103,11 @@ fun AppRoot() {
         { nav.navigate(if (sd.isStudent) Routes.S_PROFILE else Routes.T_PROFILE) { launchSingleTop = true } }
     }
 
-    CompositionLocalProvider(LocalFabHost provides fabHost, LocalOpenProfile provides openProfile) {
+    val openNotices: (() -> Unit)? = session?.let { sd ->
+        { nav.navigate(if (sd.isStudent) Routes.S_NOTICES else Routes.T_NOTICES) { launchSingleTop = true } }
+    }
+
+    CompositionLocalProvider(LocalFabHost provides fabHost, LocalOpenProfile provides openProfile, LocalOpenNotices provides openNotices) {
         Box(Modifier.fillMaxSize()) {
             NavHost(nav, startDestination = start) {
                 composable(Routes.LOGIN) {
@@ -130,7 +134,7 @@ fun AppRoot() {
 
                 // ---------------- student ----------------
                 composable(Routes.S_HOME) { StudentHome(nav) }
-                composable(Routes.S_ATT) { StudentAttendanceScreen(onBack = { nav.popBackStack() }) }
+                composable(Routes.S_ATT) { StudentAttendanceScreen() }
                 composable(Routes.S_RESULTS) { ResultsScreen(onOpen = { nav.navigate(Routes.result(it)) }, onBack = { nav.popBackStack() }) }
                 composable(Routes.S_MORE) { StudentMore(nav) }
                 composable(
@@ -141,7 +145,7 @@ fun AppRoot() {
                 composable(Routes.S_EXAMS) { ExamsScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.S_FEES) { FeesScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.S_LIBRARY) { LibraryScreen(onBack = { nav.popBackStack() }) }
-                composable(Routes.S_NOTICES) { NoticesScreen(student = true) }
+                composable(Routes.S_NOTICES) { NoticesScreen(student = true, onBack = { nav.popBackStack() }) }
                 composable(Routes.S_PROFILE) { ProfileScreen(onBack = { nav.popBackStack() }) }
 
                 // ---------------- teacher ----------------

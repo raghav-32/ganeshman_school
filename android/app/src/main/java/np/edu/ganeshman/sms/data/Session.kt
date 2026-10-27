@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
@@ -63,15 +65,36 @@ class Session(context: Context) {
         get() = prefs.getInt("last_notice_id", -1)
         set(v) { prefs.edit().putInt("last_notice_id", v).apply() }
 
-    /** Called whenever the app loads notices, so they are never notified twice. */
+    // Unread bell badge: "latest" = newest notice id we know of, "viewed" = newest the user has opened.
+    private val _latest = MutableStateFlow(prefs.getInt("latest_notice_id", -1))
+    private val _viewed = MutableStateFlow(prefs.getInt("viewed_notice_id", -1))
+    val hasUnread: Flow<Boolean> = combine(_latest, _viewed) { l, v -> v >= 0 && l > v }
+    val viewedNoticeId: Int get() = _viewed.value
+
+    /** Called whenever notices are loaded (app or background check), so they are never notified twice. */
     fun markNoticesSeen(notices: List<Notice>) {
         val max = notices.maxOfOrNull { it.id }
-        if (max == null) { if (lastNoticeId < 0) lastNoticeId = 0; return }   // no notices yet: baseline 0
+        if (max == null) {
+            if (lastNoticeId < 0) lastNoticeId = 0
+            if (_viewed.value < 0) setViewed(0)
+            if (_latest.value < 0) setLatest(0)
+            return
+        }
         if (max > lastNoticeId) lastNoticeId = max
+        if (_viewed.value < 0) setViewed(max)          // first ever load: nothing is "new" yet
+        if (max > _latest.value) setLatest(max)
     }
+
+    /** The user opened the notices screen. */
+    fun markNoticesViewed() { setViewed(maxOf(_latest.value, _viewed.value)) }
+
+    private fun setLatest(v: Int) { prefs.edit().putInt("latest_notice_id", v).apply(); _latest.value = v }
+    private fun setViewed(v: Int) { prefs.edit().putInt("viewed_notice_id", v).apply(); _viewed.value = v }
 
     fun clear() {
         prefs.edit().clear().apply()
+        _latest.value = -1
+        _viewed.value = -1
         _data.value = null
     }
 }

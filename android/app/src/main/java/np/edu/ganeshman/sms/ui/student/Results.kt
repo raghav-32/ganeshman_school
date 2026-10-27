@@ -17,7 +17,7 @@ fun ResultsScreen(onOpen: (Int) -> Unit, onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.results() }
     var filter by remember { mutableStateOf("All") }
-    Screen("My Results", onBack = onBack) {
+    Screen("My Results", onBack = onBack, refresh = state.reload) {
         AsyncContent(state) { all ->
             val types = listOf("All") + all.map { it.examType }.filter { it.isNotBlank() }.distinct()
             if (types.size > 2) PillSelector(types, filter, { it }) { filter = it }

@@ -18,9 +18,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +45,11 @@ import np.edu.ganeshman.sms.ui.theme.*
 /** When set (top-level screens), a round profile picture is shown at the top right, like Gmail. */
 val LocalOpenProfile = staticCompositionLocalOf<(() -> Unit)?> { null }
 
-/** Standard page: soft canvas, title row with optional back button, scrolling body. */
+/** Opens the notices list from the bell in the top bar. */
+val LocalOpenNotices = staticCompositionLocalOf<(() -> Unit)?> { null }
+
+/** Standard page: soft canvas, title row (back button, or bell + profile picture on top-level pages), scrolling body. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Screen(
     title: String,
@@ -51,6 +57,7 @@ fun Screen(
     subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
     bottomSpace: Dp = 120.dp,
+    refresh: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
@@ -83,24 +90,56 @@ fun Screen(
                 )
             }
             actions()
+            val openNotices = LocalOpenNotices.current
             val openProfile = LocalOpenProfile.current
+            if (onBack == null && openNotices != null) {
+                val repo = np.edu.ganeshman.sms.ui.common.LocalRepo.current
+                val unread by repo.session.hasUnread.collectAsState(initial = false)
+                Box(
+                    Modifier.size(44.dp).clip(CircleShape).clickable(onClick = openNotices),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Outlined.Notifications, contentDescription = "Notices", tint = Ink)
+                    if (unread) Box(
+                        Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 10.dp)
+                            .size(10.dp).clip(CircleShape).background(Bad)
+                    )
+                }
+            }
             if (onBack == null && openProfile != null) {
                 val me by np.edu.ganeshman.sms.ui.common.LocalRepo.current.session.data.collectAsState()
-                Box(Modifier.padding(start = 8.dp).clip(CircleShape).clickable(onClick = openProfile)) {
+                Box(Modifier.padding(start = 4.dp).clip(CircleShape).clickable(onClick = openProfile)) {
                     Avatar(me?.profile?.fullName ?: "", me?.profile?.photoUrl, 40.dp)
                 }
             }
         }
-        Column(
-            Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            content()
-            Spacer(Modifier.height(bottomSpace))
+
+        @Composable
+        fun body() {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                content()
+                Spacer(Modifier.height(bottomSpace))
+            }
+        }
+
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            if (refresh != null) {
+                var refreshing by remember { mutableStateOf(false) }
+                LaunchedEffect(refreshing) { if (refreshing) { kotlinx.coroutines.delay(900); refreshing = false } }
+                PullToRefreshBox(
+                    isRefreshing = refreshing,
+                    onRefresh = { refreshing = true; refresh() },
+                    modifier = Modifier.fillMaxSize(),
+                ) { body() }
+            } else {
+                body()
+            }
         }
     }
 }

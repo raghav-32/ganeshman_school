@@ -28,6 +28,7 @@ fun <T> Load<T>.dataOrNull(): T? = (this as? Load.Ready<T>)?.data
 fun <T> rememberAsync(key: Any? = Unit, block: suspend () -> T): AsyncState<T> {
     var load by remember(key) { mutableStateOf<Load<T>>(Load.Loading) }
     var tick by remember(key) { mutableIntStateOf(0) }
+    val api = np.edu.ganeshman.sms.ui.common.LocalRepo.current.api
     val current by rememberUpdatedState(block)
     LaunchedEffect(key, tick) {
         if (load !is Load.Ready<*>) load = Load.Loading
@@ -41,7 +42,7 @@ fun <T> rememberAsync(key: Any? = Unit, block: suspend () -> T): AsyncState<T> {
             Load.Error("Something went wrong. Please try again.")
         }
     }
-    return AsyncState(load) { tick++ }
+    return AsyncState(load) { api.clearCache(); tick++ }
 }
 
 /** Skeletons while loading, a friendly retry card on failure, otherwise [content]. */

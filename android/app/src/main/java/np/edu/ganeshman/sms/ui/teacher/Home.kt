@@ -25,6 +25,7 @@ fun TeacherHome(nav: NavHostController) {
     val me by repo.session.data.collectAsState()
     val first = me?.profile?.firstName.orEmpty()
     Screen(
+        refresh = state.reload,
         title = if (first.isBlank()) greeting() else "${greeting()}, $first",
         subtitle = state.load.dataOrNull()?.today?.let { listOfNotNull(it.weekday.ifBlank { null }, it.dateBs).joinToString(" • ") },
     ) {

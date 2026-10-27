@@ -30,6 +30,7 @@ fun StudentHome(nav: NavHostController) {
     Screen(
         title = if (first.isBlank()) greeting() else "${greeting()}, $first",
         subtitle = me?.profile?.klass?.label,
+        refresh = state.reload,
     ) {
         AsyncContent(state, skeletons = 4) { d ->
             Panel(color = PastelGreen, padding = 20.dp) {
@@ -105,11 +106,12 @@ fun StudentHome(nav: NavHostController) {
 }
 
 @Composable
-fun NoticeCard(n: Notice) {
+fun NoticeCard(n: Notice, isNew: Boolean = false) {
     var open by remember { mutableStateOf(false) }
     Panel(onClick = { open = !open }) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(n.title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+            if (isNew) Chip("New", PastelPink, OnPink)
         }
         Text(
             n.content, style = MaterialTheme.typography.bodyMedium, color = InkSoft,

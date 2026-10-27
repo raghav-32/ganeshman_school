@@ -41,7 +41,7 @@ fun StudentAttendanceScreen(onBack: (() -> Unit)? = null) {
     val data = state.load.dataOrNull()
     LaunchedEffect(data) { data?.let { overall = it.summary } }
 
-    Screen("My Attendance", onBack = onBack) {
+    Screen("My Attendance", onBack = onBack, refresh = state.reload) {
         overall?.let { o ->
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Ring((o.percentage / 100).toFloat(), pctColor(o.percentage), size = 130.dp, stroke = 12.dp, label = "${num(o.percentage)}%")
