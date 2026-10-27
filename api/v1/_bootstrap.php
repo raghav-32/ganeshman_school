@@ -58,7 +58,7 @@ function api_fail(int $status, string $message, array $errors = []): void {
 
 set_exception_handler(function (Throwable $e) {
     error_log('[api/v1] ' . $e);
-    if (!headers_sent()) api_fail(500, 'Server error. Please try again.');
+    if (!headers_sent()) api_fail(500, 'Server error: ' . $e->getMessage());
 });
 register_shutdown_function(function () {
     $err = error_get_last();

@@ -13,6 +13,7 @@ api_method('POST');
 
 const REG_MAX_PER_HOUR = 30;     // flood guard for this public endpoint (all callers combined)
 
+ensurePendingColumns();
 $in = api_input();
 $f  = fn(string $k) => sanitize((string)($in[$k] ?? ''));       // same storage convention as signup.php
 
@@ -100,6 +101,7 @@ if (!is_writable($dir) || file_put_contents($dir . $photoName, $bytes) === false
     api_fail(500, 'Could not save the photo. Please try again later.');
 }
 
+try {
 $ok = db()->execute(
     "INSERT INTO pending_registrations
      (first_name, last_name, dob, gender, class_id, phone, email, address, guardian_name, guardian_phone,
@@ -109,6 +111,11 @@ $ok = db()->execute(
     [$firstName, $lastName, $dob, $gender, $classId, $phone, $email, $address, $gName, $gPhone,
      $gRel, $admDate !== '' ? $admDate : null, $photoName, $username, hashPassword($password)]
 );
+} catch (\Throwable $ex) {
+    $ok = false;
+    @unlink($dir . $photoName);
+    api_fail(500, 'Registration failed: ' . $ex->getMessage());
+}
 if (!$ok) {
     @unlink($dir . $photoName);
     error_log('[api/v1] registration insert failed: ' . db()->lastError);
