@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
@@ -44,6 +45,9 @@ import np.edu.ganeshman.sms.ui.theme.*
 
 /** When set (top-level screens), a round profile picture is shown at the top right, like Gmail. */
 val LocalOpenProfile = staticCompositionLocalOf<(() -> Unit)?> { null }
+
+/** Opens the global search from the magnifier in the top bar. */
+val LocalOpenSearch = staticCompositionLocalOf<(() -> Unit)?> { null }
 
 /** Opens the notices list from the bell in the top bar. */
 val LocalOpenNotices = staticCompositionLocalOf<(() -> Unit)?> { null }
@@ -90,8 +94,15 @@ fun Screen(
                 )
             }
             actions()
+            val openSearch = LocalOpenSearch.current
             val openNotices = LocalOpenNotices.current
             val openProfile = LocalOpenProfile.current
+            if (onBack == null && openSearch != null) {
+                Box(
+                    Modifier.size(44.dp).clip(CircleShape).clickable(onClick = openSearch),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(Icons.Outlined.Search, contentDescription = "Search", tint = Ink) }
+            }
             if (onBack == null && openNotices != null) {
                 val repo = np.edu.ganeshman.sms.ui.common.LocalRepo.current
                 val unread by repo.session.hasUnread.collectAsState(initial = false)
@@ -258,7 +269,7 @@ fun BigButton(
             modifier = modifier.fillMaxWidth().height(54.dp),
         ) {
             if (loading) CircularProgressIndicator(
-                Modifier.size(22.dp), color = Color.White, strokeWidth = 2.5.dp,
+                Modifier.size(22.dp), color = OnBrand, strokeWidth = 2.5.dp,
             ) else Text(text, style = MaterialTheme.typography.titleSmall)
         }
     }
@@ -330,7 +341,7 @@ fun <T> PillSelector(items: List<T>, selected: T?, label: (T) -> String, onSelec
             Text(
                 label(item),
                 style = MaterialTheme.typography.labelLarge,
-                color = if (on) Color.White else Ink,
+                color = if (on) OnBrand else Ink,
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(if (on) Brand else Surface)
@@ -375,7 +386,7 @@ fun Skeleton(height: Dp = 90.dp, modifier: Modifier = Modifier) {
             .height(height)
             .alpha(a)
             .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFFE9EDE6))
+            .background(SoftBg)
     )
 }
 

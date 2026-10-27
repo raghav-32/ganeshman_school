@@ -44,6 +44,7 @@ object NoticeAlerts {
 
     fun show(context: Context, notices: List<Notice>) {
         if (notices.isEmpty() || !canNotify(context)) return
+        if (!(context.applicationContext as GmsApp).settings.notifications.value) return   // turned off in Settings
         val nm = NotificationManagerCompat.from(context)
         if (Build.VERSION.SDK_INT >= 26) {
             nm.createNotificationChannel(

@@ -93,10 +93,10 @@ fun AppFab(spec: FabSpec, modifier: Modifier = Modifier) {
             onClick = { if (!spec.loading) spec.onClick() },
             modifier = modifier,
             containerColor = Brand,
-            contentColor = Color.White,
+            contentColor = OnBrand,
             shape = CircleShape,
         ) {
-            if (spec.loading) CircularProgressIndicator(Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+            if (spec.loading) CircularProgressIndicator(Modifier.size(20.dp), color = OnBrand, strokeWidth = 2.dp)
             else Icon(spec.icon, null)
             Spacer(Modifier.width(8.dp))
             Text(spec.label, style = MaterialTheme.typography.labelLarge)
@@ -106,7 +106,7 @@ fun AppFab(spec: FabSpec, modifier: Modifier = Modifier) {
             onClick = spec.onClick,
             modifier = modifier,
             containerColor = Brand,
-            contentColor = Color.White,
+            contentColor = OnBrand,
             shape = CircleShape,
         ) {
             Icon(spec.icon, null, modifier = Modifier.rotate(rot))

@@ -19,15 +19,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import np.edu.ganeshman.sms.ui.theme.*
 
-enum class Illustration(val icon: ImageVector, val blob: Color, val accent: Color, val ink: Color) {
-    Inbox(Icons.Outlined.Inbox, PastelGreen, PastelBlue, OnGreen),
-    Notices(Icons.Outlined.Campaign, PastelYellow, PastelPeach, OnYellow),
-    Results(Icons.Outlined.EmojiEvents, PastelLilac, PastelBlue, OnLilac),
-    Calendar(Icons.Outlined.CalendarMonth, PastelBlue, PastelGreen, OnBlue),
-    Books(Icons.Outlined.MenuBook, PastelPeach, PastelYellow, OnPeach),
-    People(Icons.Outlined.Groups, PastelPink, PastelLilac, OnPink),
-    Money(Icons.Outlined.Payments, PastelGreen, PastelYellow, OnGreen),
-    Offline(Icons.Outlined.CloudOff, PastelPink, PastelPeach, OnPink),
+enum class Illustration(
+    val icon: ImageVector,
+    private val blobColor: () -> Color,
+    private val accentColor: () -> Color,
+    private val inkColor: () -> Color,
+) {
+    Inbox(Icons.Outlined.Inbox, { PastelGreen }, { PastelBlue }, { OnGreen }),
+    Notices(Icons.Outlined.Campaign, { PastelYellow }, { PastelPeach }, { OnYellow }),
+    Results(Icons.Outlined.EmojiEvents, { PastelLilac }, { PastelBlue }, { OnLilac }),
+    Calendar(Icons.Outlined.CalendarMonth, { PastelBlue }, { PastelGreen }, { OnBlue }),
+    Books(Icons.Outlined.MenuBook, { PastelPeach }, { PastelYellow }, { OnPeach }),
+    People(Icons.Outlined.Groups, { PastelPink }, { PastelLilac }, { OnPink }),
+    Money(Icons.Outlined.Payments, { PastelGreen }, { PastelYellow }, { OnGreen }),
+    Offline(Icons.Outlined.CloudOff, { PastelPink }, { PastelPeach }, { OnPink });
+
+    val blob: Color get() = blobColor()
+    val accent: Color get() = accentColor()
+    val ink: Color get() = inkColor()
 }
 
 /** Centered pastel illustration drawn on a Canvas — no image assets needed. */
@@ -60,7 +69,7 @@ fun EmptyState(
                 drawCircle(illustration.ink.copy(alpha = 0.25f), radius = w * 0.02f, center = Offset(w * 0.2f, h * 0.8f))
                 // little card behind the icon
                 drawRoundRect(
-                    Color.White,
+                    Surface,
                     topLeft = Offset(w * 0.26f, h * 0.3f),
                     size = Size(w * 0.48f, h * 0.44f),
                     cornerRadius = CornerRadius(w * 0.1f),

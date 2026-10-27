@@ -13,8 +13,8 @@ android {
         applicationId = "np.edu.ganeshman.sms"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         // The school website's API. Change this one line if the site moves
         // (must end with a slash and use https).

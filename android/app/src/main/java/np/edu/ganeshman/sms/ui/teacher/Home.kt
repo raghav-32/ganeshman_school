@@ -74,6 +74,8 @@ fun TeacherMore(nav: NavHostController) {
             MoreItem("Students", "Class lists and attendance rates", Icons.Outlined.Groups, PastelBlue, OnBlue, Routes.T_STUDENTS),
             MoreItem("Notices", "School announcements", Icons.Outlined.Campaign, PastelPink, OnPink, Routes.T_NOTICES),
             MoreItem("Profile", "Your details and password", Icons.Outlined.Person, PastelGreen, OnGreen, Routes.T_PROFILE),
+            MoreItem("Settings", "Theme, text size, notifications", Icons.Outlined.Settings, PastelBlue, OnBlue, Routes.SETTINGS),
+            MoreItem("About app", "Version and website", Icons.Outlined.Info, PastelLilac, OnLilac, Routes.ABOUT),
         ),
         nav,
     )

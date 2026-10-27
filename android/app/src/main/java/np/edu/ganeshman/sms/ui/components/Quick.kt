@@ -89,7 +89,7 @@ fun IconTile(icon: ImageVector, value: String, caption: String, bg: Color, fg: C
         modifier.clip(RoundedCornerShape(24.dp)).background(bg).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Box(Modifier.size(30.dp).clip(RoundedCornerShape(10.dp)).background(Color.White.copy(alpha = 0.7f)), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(30.dp).clip(RoundedCornerShape(10.dp)).background(Surface.copy(alpha = 0.6f)), contentAlignment = Alignment.Center) {
             Icon(icon, null, tint = fg, modifier = Modifier.size(18.dp))
         }
         Column {

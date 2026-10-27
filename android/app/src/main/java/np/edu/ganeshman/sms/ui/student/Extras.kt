@@ -21,7 +21,7 @@ private val dayNames = mapOf(
     "Thursday" to "बिही", "Friday" to "शुक्र", "Saturday" to "शनि",
 )
 
-private val periodColors = listOf(
+private val periodColors get() = listOf(
     PastelBlue to OnBlue, PastelPeach to OnPeach, PastelGreen to OnGreen, PastelLilac to OnLilac, PastelYellow to OnYellow,
 )
 
@@ -248,6 +248,8 @@ fun StudentMore(nav: androidx.navigation.NavHostController) {
             MoreItem("My Fees", "Dues and payments", Icons.Outlined.Payments, PastelYellow, OnYellow, Routes.S_FEES),
             MoreItem("Library", "Borrow and request books", Icons.Outlined.MenuBook, PastelPeach, OnPeach, Routes.S_LIBRARY),
             MoreItem("My Profile", "Details and password", Icons.Outlined.Person, PastelPink, OnPink, Routes.S_PROFILE),
+            MoreItem("Settings", "Theme, text size, notifications", Icons.Outlined.Settings, PastelBlue, OnBlue, Routes.SETTINGS),
+            MoreItem("About app", "Version and website", Icons.Outlined.Info, PastelLilac, OnLilac, Routes.ABOUT),
         ),
         nav,
     )

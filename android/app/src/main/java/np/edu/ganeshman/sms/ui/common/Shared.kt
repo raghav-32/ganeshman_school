@@ -2,6 +2,7 @@ package np.edu.ganeshman.sms.ui.common
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,10 +30,12 @@ fun NoticesScreen(student: Boolean, onBack: (() -> Unit)? = null) {
 }
 
 @Composable
-fun ProfileScreen(onBack: () -> Unit) {
+fun ProfileScreen(onBack: () -> Unit, onSettings: () -> Unit = {}) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.me() }
     var pwOpen by remember { mutableStateOf(false) }
+    var signOut by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Screen("Profile", onBack = onBack) {
         AsyncContent(state) { p ->
@@ -62,9 +65,18 @@ fun ProfileScreen(onBack: () -> Unit) {
                 InfoRow(Icons.Outlined.FamilyRestroom, "Relation", p.guardianRelation)
             }
             BigButton("Change password", { pwOpen = true }, outlined = true)
+            BigButton("Settings", onSettings, outlined = true)
+            Panel(color = PastelPink, onClick = { signOut = true }, padding = 16.dp) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    Icon(Icons.AutoMirrored.Outlined.Logout, null, tint = OnPink)
+                    Spacer(Modifier.width(10.dp))
+                    Text("Sign out", style = MaterialTheme.typography.titleSmall, color = OnPink)
+                }
+            }
         }
     }
     if (pwOpen) ChangePasswordSheet { pwOpen = false }
+    if (signOut) SignOutDialog({ signOut = false }) { scope.launch { repo.logout() } }
 }
 
 @Composable

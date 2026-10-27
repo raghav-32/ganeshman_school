@@ -54,7 +54,7 @@ fun StudentHome(nav: NavHostController) {
 
             SectionTitle("Recent Results", "View All") { nav.navigate(Routes.S_RESULTS) }
             if (d.latestResults.isEmpty()) {
-                Panel(color = Color(0xFFF0F1F8)) {
+                Panel(color = SoftBg) {
                     EmptyState(Illustration.Results, "No published results yet.", "Your exam results will appear here once published.")
                 }
             } else d.latestResults.take(2).forEach { r ->

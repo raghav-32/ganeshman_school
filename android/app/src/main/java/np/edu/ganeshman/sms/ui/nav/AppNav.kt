@@ -24,11 +24,15 @@ import np.edu.ganeshman.sms.ui.auth.LoginScreen
 import np.edu.ganeshman.sms.ui.auth.PendingScreen
 import np.edu.ganeshman.sms.ui.auth.RegisterScreen
 import np.edu.ganeshman.sms.ui.common.LocalRepo
+import np.edu.ganeshman.sms.ui.common.LocalSettings
 import np.edu.ganeshman.sms.ui.common.Routes
 import np.edu.ganeshman.sms.ui.components.*
 import np.edu.ganeshman.sms.ui.student.*
 import np.edu.ganeshman.sms.ui.teacher.*
 import np.edu.ganeshman.sms.ui.common.NoticesScreen
+import np.edu.ganeshman.sms.ui.common.SettingsScreen
+import np.edu.ganeshman.sms.ui.common.AboutScreen
+import np.edu.ganeshman.sms.ui.common.SearchScreen
 import np.edu.ganeshman.sms.ui.common.ProfileScreen
 
 private val studentTabs = listOf(
@@ -68,8 +72,9 @@ fun AppRoot() {
     // Background notice checks + notification permission (Android 13+)
     val ctx = LocalContext.current
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-    LaunchedEffect(session != null) {
-        if (session != null) {
+    val alertsOn by LocalSettings.current.notifications.collectAsState()
+    LaunchedEffect(session != null, alertsOn) {
+        if (session != null && alertsOn) {
             NoticeAlerts.schedule(ctx)
             if (Build.VERSION.SDK_INT >= 33 && !NoticeAlerts.canNotify(ctx)) {
                 permission.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -107,7 +112,12 @@ fun AppRoot() {
         { nav.navigate(if (sd.isStudent) Routes.S_NOTICES else Routes.T_NOTICES) { launchSingleTop = true } }
     }
 
-    CompositionLocalProvider(LocalFabHost provides fabHost, LocalOpenProfile provides openProfile, LocalOpenNotices provides openNotices) {
+    val openSearch: (() -> Unit)? = session?.let { { nav.navigate(Routes.SEARCH) { launchSingleTop = true } } }
+
+    CompositionLocalProvider(
+        LocalFabHost provides fabHost, LocalOpenProfile provides openProfile,
+        LocalOpenNotices provides openNotices, LocalOpenSearch provides openSearch,
+    ) {
         Box(Modifier.fillMaxSize()) {
             NavHost(nav, startDestination = start) {
                 composable(Routes.LOGIN) {
@@ -146,7 +156,7 @@ fun AppRoot() {
                 composable(Routes.S_FEES) { FeesScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.S_LIBRARY) { LibraryScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.S_NOTICES) { NoticesScreen(student = true, onBack = { nav.popBackStack() }) }
-                composable(Routes.S_PROFILE) { ProfileScreen(onBack = { nav.popBackStack() }) }
+                composable(Routes.S_PROFILE) { ProfileScreen(onBack = { nav.popBackStack() }, onSettings = { nav.navigate(Routes.SETTINGS) }) }
 
                 // ---------------- teacher ----------------
                 composable(Routes.T_HOME) { TeacherHome(nav) }
@@ -159,7 +169,14 @@ fun AppRoot() {
                 ) { e -> MarksEntryScreen(e.arguments?.getInt("examId") ?: 0, onBack = { nav.popBackStack() }) }
                 composable(Routes.T_STUDENTS) { StudentsScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.T_NOTICES) { NoticesScreen(student = false, onBack = { nav.popBackStack() }) }
-                composable(Routes.T_PROFILE) { ProfileScreen(onBack = { nav.popBackStack() }) }
+                composable(Routes.T_PROFILE) { ProfileScreen(onBack = { nav.popBackStack() }, onSettings = { nav.navigate(Routes.SETTINGS) }) }
+                composable(Routes.SETTINGS) {
+                    SettingsScreen(onBack = { nav.popBackStack() }, onAbout = { nav.navigate(Routes.ABOUT) }, onSignOut = { })
+                }
+                composable(Routes.ABOUT) { AboutScreen(onBack = { nav.popBackStack() }) }
+                composable(Routes.SEARCH) {
+                    SearchScreen(student = session?.isStudent != false, nav = nav, onBack = { nav.popBackStack() })
+                }
             }
 
             val s = session

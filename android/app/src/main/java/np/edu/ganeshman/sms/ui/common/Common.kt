@@ -6,11 +6,15 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 val LocalRepo = staticCompositionLocalOf<Repository> { error("Repository not provided") }
+val LocalSettings = staticCompositionLocalOf<np.edu.ganeshman.sms.data.AppSettings> { error("Settings not provided") }
 
 object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val PENDING = "pending"
+    const val SETTINGS = "settings"
+    const val ABOUT = "about"
+    const val SEARCH = "search"
 
     const val S_HOME = "s/home"
     const val S_ATT = "s/attendance"
