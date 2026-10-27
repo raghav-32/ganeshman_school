@@ -48,6 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $guardianRel  = sanitize($_POST['guardian_relation']?? '');
         $classId      = (int)($_POST['class_id']            ?? 0);
         $admDate      = sanitize($_POST['admission_date']   ?? date('Y-m-d'));
+        if ($dob === '')     $dob = null;
+        if ($admDate === '') $admDate = null;
+        if ($classId <= 0)   $classId = null;
         $photo        = uploadStudentPhoto();
         if (!empty($GLOBALS['photo_error'])) {   // don't silently ignore a rejected photo
             setFlash('danger', $GLOBALS['photo_error']);
@@ -105,12 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else { // edit
             $id = (int)($_POST['id'] ?? 0);
             if ($photo) {
-                // Remove old photo
                 $old = db()->fetchOne("SELECT photo FROM students WHERE id=?", 'i', [$id]);
-                if ($old && !empty($old['photo']) && $old['photo'] !== 'default.png') {
-                    @unlink('../assets/uploads/students/' . $old['photo']);
-                }
-                db()->execute(
+                $saved = db()->execute(
                     "UPDATE students SET first_name=?,last_name=?,dob=?,gender=?,address=?,phone=?,email=?,
                      guardian_name=?,guardian_phone=?,guardian_relation=?,class_id=?,admission_date=?,photo=?
                      WHERE id=?",
@@ -119,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      $guardianName,$guardianPhone,$guardianRel,$classId,$admDate,$photo,$id]
                 );
             } else {
-                db()->execute(
+                $saved = db()->execute(
                     "UPDATE students SET first_name=?,last_name=?,dob=?,gender=?,address=?,phone=?,email=?,
                      guardian_name=?,guardian_phone=?,guardian_relation=?,class_id=?,admission_date=?
                      WHERE id=?",
@@ -128,12 +127,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      $guardianName,$guardianPhone,$guardianRel,$classId,$admDate,$id]
                 );
             }
+            $saveError = db()->lastError;
+            // Remove the old photo only after the new one is safely saved
+            if ($saved && $photo && !empty($old['photo']) && $old['photo'] !== 'default.png') {
+                @unlink('../assets/uploads/students/' . $old['photo']);
+            }
             // Keep the login account's email in sync with the student's contact email
             db()->execute(
                 "UPDATE users u INNER JOIN students s ON u.id = s.user_id SET u.email=? WHERE s.id=?",
                 'si', [$email, $id]
             );
-            setFlash('success', 'Student updated successfully.');
+            if ($saved) {
+                setFlash('success', 'Student updated successfully.');
+            } else {
+                setFlash('danger', 'Student could NOT be updated: ' . htmlspecialchars($saveError ?: 'unknown database error'));
+            }
         }
         redirect('students.php');
     }
