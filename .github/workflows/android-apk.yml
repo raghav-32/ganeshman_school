@@ -29,7 +29,29 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build debug APK
-        run: chmod +x gradlew && ./gradlew assembleDebug --stacktrace
+        id: build
+        run: |
+          chmod +x gradlew
+          set +e
+          ./gradlew assembleDebug --console=plain 2>&1 | tee build.log
+          code=${PIPESTATUS[0]}
+          exit $code
+
+      - name: Summarise build errors
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import re
+          lines = [l.strip() for l in open('build.log', errors='replace')
+                   if l.startswith('e: ') or 'error:' in l or 'What went wrong' in l or l.startswith('> ') or 'FAILED' in l]
+          seen = []
+          for l in lines:
+              l = re.sub(r'file:///home/runner/work/[^/]+/[^/]+/android/app/src/main/java/np/edu/ganeshman/sms/', '', l)
+              if l not in seen: seen.append(l)
+          for i in range(0, min(len(seen), 150), 15):
+              chunk = '%0A'.join(x.replace('%', '%25') for x in seen[i:i+15])
+              print('::error title=build errors %d::%s' % (i // 15 + 1, chunk))
+          PY
 
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk GaneshmanSchool.apk
