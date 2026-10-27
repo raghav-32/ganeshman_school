@@ -324,7 +324,7 @@ footer{background:var(--dark);color:#c7ccd4;padding:44px 20px 20px}
       <li><a href="#notices">Notices</a></li>
       <li><a href="#why-us">Why GMS</a></li>
       <li><a href="#contact">Contact</a></li>
-      <li><a href="login" class="nav-login"><i class="fas fa-sign-in-alt"></i> Portal Login</a></li>
+      <li><a href="login.php" class="nav-login"><i class="fas fa-sign-in-alt"></i> Portal Login</a></li>
     </ul>
     <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
   </div>
@@ -334,7 +334,7 @@ footer{background:var(--dark);color:#c7ccd4;padding:44px 20px 20px}
     <a href="#notices" onclick="closeMobile()">Notices</a>
     <a href="#why-us" onclick="closeMobile()">Why GMS</a>
     <a href="#contact" onclick="closeMobile()">Contact</a>
-    <a href="login" style="color:var(--orange);font-weight:700">Portal Login</a>
+    <a href="login.php" style="color:var(--orange);font-weight:700">Portal Login</a>
   </div>
 </header>
 
@@ -350,7 +350,7 @@ footer{background:var(--dark);color:#c7ccd4;padding:44px 20px 20px}
     <p class="tagline"><?= htmlspecialchars($ls('hero_tagline','Knowledge · Integrity · Excellence')) ?></p>
     <div class="hero-buttons">
       <a href="#programs" class="btn btn-orange">View Courses</a>
-      <a href="login" class="btn btn-outline">Portal Login</a>
+      <a href="login.php" class="btn btn-outline">Portal Login</a>
     </div>
   </div>
 </section>
@@ -446,7 +446,7 @@ footer{background:var(--dark);color:#c7ccd4;padding:44px 20px 20px}
       <span class="section-label">Latest Updates</span>
       <h2 class="section-title" style="margin-bottom:0">College Notices</h2>
     </div>
-    <a href="login" class="btn btn-primary">View All Notices</a>
+    <a href="login.php" class="btn btn-primary">View All Notices</a>
   </div>
   <div class="notices-grid">
     <?php if(empty($notices)): ?>
@@ -597,7 +597,7 @@ footer{background:var(--dark);color:#c7ccd4;padding:44px 20px 20px}
         <li><i class="fas fa-chevron-right"></i><a href="#programs">IT Engineering</a></li>
         <li><i class="fas fa-chevron-right"></i><a href="#programs">Civil Engineering</a></li>
         <li><i class="fas fa-chevron-right"></i><a href="#notices">Notices</a></li>
-        <li><i class="fas fa-chevron-right"></i><a href="login">Staff Portal</a></li>
+        <li><i class="fas fa-chevron-right"></i><a href="login.php">Staff Portal</a></li>
       </ul>
     </div>
     <div class="footer-col">

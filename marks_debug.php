@@ -1,6 +1,6 @@
 <?php
 require_once 'includes/auth.php';
-requireRole('teacher', 'login');
+requireRole('teacher', 'login.php');
 
 $user      = currentUser();
 $teacherId = $user['ref_id'];

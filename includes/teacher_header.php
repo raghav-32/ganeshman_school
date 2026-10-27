@@ -31,19 +31,19 @@ $notifNotices = db()->fetchAll("SELECT title,content,created_at FROM notices WHE
 <body>
 <div class="app-wrapper">
 <aside class="sidebar" id="sidebar">
-    <a href="dashboard" class="sidebar-brand" style="text-decoration:none;color:inherit;display:flex;align-items:center;">
+    <a href="dashboard.php" class="sidebar-brand" style="text-decoration:none;color:inherit;display:flex;align-items:center;">
         <div class="brand-icon" style="background:linear-gradient(135deg,#059669,#10b981);"><img src="../assets/images/gms.png" alt="gms"></div>
         <div class="brand-text"><h3>Ganeshman Singh</h3><span>Teacher Panel</span></div>
     </a>
     <nav class="sidebar-nav">
         <span class="nav-section-title">Main</span>
-        <a href="dashboard" class="nav-item <?= $activeMenu==='dashboard'?'active':'' ?>"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="dashboard.php" class="nav-item <?= $activeMenu==='dashboard'?'active':'' ?>"><i class="fas fa-th-large"></i> Dashboard</a>
         <span class="nav-section-title">Academic</span>
-        <a href="attendance" class="nav-item <?= $activeMenu==='attendance'?'active':'' ?>"><i class="fas fa-clipboard-check"></i> Mark Attendance</a>
-        <a href="marks"      class="nav-item <?= $activeMenu==='marks'?'active':'' ?>"><i class="fas fa-star-half-alt"></i> Enter Marks</a>
-        <a href="students"   class="nav-item <?= $activeMenu==='students'?'active':'' ?>"><i class="fas fa-user-graduate"></i> My Students</a>
+        <a href="attendance.php" class="nav-item <?= $activeMenu==='attendance'?'active':'' ?>"><i class="fas fa-clipboard-check"></i> Mark Attendance</a>
+        <a href="marks.php"      class="nav-item <?= $activeMenu==='marks'?'active':'' ?>"><i class="fas fa-star-half-alt"></i> Enter Marks</a>
+        <a href="students.php"   class="nav-item <?= $activeMenu==='students'?'active':'' ?>"><i class="fas fa-user-graduate"></i> My Students</a>
         <span class="nav-section-title">Communication</span>
-        <a href="notices" class="nav-item <?= $activeMenu==='notices'?'active':'' ?>"><i class="fas fa-bullhorn"></i> Notices</a>
+        <a href="notices.php" class="nav-item <?= $activeMenu==='notices'?'active':'' ?>"><i class="fas fa-bullhorn"></i> Notices</a>
     </nav>
     <div class="sidebar-footer">
         <div class="sidebar-user">
@@ -55,7 +55,7 @@ $notifNotices = db()->fetchAll("SELECT title,content,created_at FROM notices WHE
                 <?php endif; ?>
             </div>
             <div class="user-info"><h4><?= htmlspecialchars($user['name']) ?></h4><span>Teacher</span></div>
-            <a href="../logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            <a href="../logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </div>
 </aside>

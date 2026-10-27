@@ -111,7 +111,7 @@ include '../includes/admin_header.php';
             <input type="hidden" name="date" value="<?= $filterDate ?>">
             <?php endif; ?>
 
-            <a href="attendance" class="btn btn-outline" style="margin-bottom:0;">Reset</a>
+            <a href="attendance.php" class="btn btn-outline" style="margin-bottom:0;">Reset</a>
         </form>
     </div>
 </div>

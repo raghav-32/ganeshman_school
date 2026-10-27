@@ -37,15 +37,15 @@ $notifNotices = db()->fetchAll("SELECT title,content,created_at FROM notices WHE
     </div>
     <nav class="sidebar-nav">
         <span class="nav-section-title">My Portal</span>
-        <a href="dashboard" class="nav-item <?= $activeMenu==='dashboard'?'active':'' ?>"><i class="fas fa-th-large"></i> Dashboard</a>
-        <a href="profile"   class="nav-item <?= $activeMenu==='profile'?'active':'' ?>"><i class="fas fa-id-card"></i> My Profile</a>
-        <a href="attendance" class="nav-item <?= $activeMenu==='attendance'?'active':'' ?>"><i class="fas fa-clipboard-check"></i> My Attendance</a>
-        <a href="results"   class="nav-item <?= $activeMenu==='results'?'active':'' ?>"><i class="fas fa-star-half-alt"></i> My Results</a>
-        <a href="exams"     class="nav-item <?= $activeMenu==='exams'?'active':'' ?>"><i class="fas fa-file-alt"></i> Exam Schedule</a>
-        <a href="fees"      class="nav-item <?= $activeMenu==='fees'?'active':'' ?>"><i class="fas fa-rupee-sign"></i> My Fees</a>
-        <a href="timetable" class="nav-item <?= $activeMenu==='timetable'?'active':'' ?>"><i class="fas fa-calendar-alt"></i> Timetable</a>
-        <a href="notices"   class="nav-item <?= $activeMenu==='notices'?'active':'' ?>"><i class="fas fa-bullhorn"></i> Notices</a>
-        <a href="library"   class="nav-item <?= $activeMenu==='library'?'active':'' ?>"><i class="fas fa-book-open"></i> Library</a>
+        <a href="dashboard.php" class="nav-item <?= $activeMenu==='dashboard'?'active':'' ?>"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="profile.php"   class="nav-item <?= $activeMenu==='profile'?'active':'' ?>"><i class="fas fa-id-card"></i> My Profile</a>
+        <a href="attendance.php" class="nav-item <?= $activeMenu==='attendance'?'active':'' ?>"><i class="fas fa-clipboard-check"></i> My Attendance</a>
+        <a href="results.php"   class="nav-item <?= $activeMenu==='results'?'active':'' ?>"><i class="fas fa-star-half-alt"></i> My Results</a>
+        <a href="exams.php"     class="nav-item <?= $activeMenu==='exams'?'active':'' ?>"><i class="fas fa-file-alt"></i> Exam Schedule</a>
+        <a href="fees.php"      class="nav-item <?= $activeMenu==='fees'?'active':'' ?>"><i class="fas fa-rupee-sign"></i> My Fees</a>
+        <a href="timetable.php" class="nav-item <?= $activeMenu==='timetable'?'active':'' ?>"><i class="fas fa-calendar-alt"></i> Timetable</a>
+        <a href="notices.php"   class="nav-item <?= $activeMenu==='notices'?'active':'' ?>"><i class="fas fa-bullhorn"></i> Notices</a>
+        <a href="library.php"   class="nav-item <?= $activeMenu==='library'?'active':'' ?>"><i class="fas fa-book-open"></i> Library</a>
     </nav>
     <div class="sidebar-footer">
         <div class="sidebar-user">
@@ -57,7 +57,7 @@ $notifNotices = db()->fetchAll("SELECT title,content,created_at FROM notices WHE
                 <?php endif; ?>
             </div>
             <div class="user-info"><h4><?= htmlspecialchars($user['name']) ?></h4><span>Student</span></div>
-            <a href="../logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            <a href="../logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </div>
 </aside>

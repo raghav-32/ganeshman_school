@@ -513,9 +513,9 @@ document.addEventListener('DOMContentLoaded', function() {
     bar.style.cssText = 'position:fixed;top:0;left:0;height:3px;width:0;background:var(--primary,#2563a8);z-index:99999;transition:width .25s ease,opacity .3s ease;pointer-events:none;';
     document.body.appendChild(bar);
 
-    // Strip .php from URLs shown in browser address bar
+    // URLs are kept exactly as-is (previously .php was stripped)
     function cleanUrl(url) {
-        return url.replace(/\.php(\?|#|$)/, function(m, p) { return p === '$' ? '' : p; });
+        return url;   // keep .php in the address bar (host has no clean-URL rewrite)
     }
 
     var barTimer;

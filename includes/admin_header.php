@@ -35,7 +35,7 @@ $notifNotices = db()->fetchAll("
 <div class="app-wrapper">
 
 <aside class="sidebar" id="sidebar">
-    <a href="dashboard" class="sidebar-brand" style="text-decoration:none;color:inherit;display:flex;align-items:center;">
+    <a href="dashboard.php" class="sidebar-brand" style="text-decoration:none;color:inherit;display:flex;align-items:center;">
         <div class="brand-icon"><img src="../assets/images/gms.png" alt="gms"></div>
         <div class="brand-text">
             <h3>Ganeshman Singh</h3>
@@ -45,26 +45,26 @@ $notifNotices = db()->fetchAll("
 
     <nav class="sidebar-nav">
         <span class="nav-section-title">Main</span>
-        <a href="dashboard" class="nav-item <?= $activeMenu==='dashboard'?'active':'' ?>"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="dashboard.php" class="nav-item <?= $activeMenu==='dashboard'?'active':'' ?>"><i class="fas fa-th-large"></i> Dashboard</a>
 
         <span class="nav-section-title">Academic</span>
-        <a href="students"  class="nav-item <?= $activeMenu==='students'?'active':'' ?>"><i class="fas fa-user-graduate"></i> Students</a>
-        <a href="teachers"  class="nav-item <?= $activeMenu==='teachers'?'active':'' ?>"><i class="fas fa-chalkboard-teacher"></i> Teachers</a>
-        <a href="classes"   class="nav-item <?= $activeMenu==='classes'?'active':'' ?>"><i class="fas fa-school"></i> Classes</a>
-        <a href="subjects"  class="nav-item <?= $activeMenu==='subjects'?'active':'' ?>"><i class="fas fa-book-open"></i> Subjects</a>
-        <a href="timetable" class="nav-item <?= $activeMenu==='timetable'?'active':'' ?>"><i class="fas fa-calendar-alt"></i> Timetable</a>
+        <a href="students.php"  class="nav-item <?= $activeMenu==='students'?'active':'' ?>"><i class="fas fa-user-graduate"></i> Students</a>
+        <a href="teachers.php"  class="nav-item <?= $activeMenu==='teachers'?'active':'' ?>"><i class="fas fa-chalkboard-teacher"></i> Teachers</a>
+        <a href="classes.php"   class="nav-item <?= $activeMenu==='classes'?'active':'' ?>"><i class="fas fa-school"></i> Classes</a>
+        <a href="subjects.php"  class="nav-item <?= $activeMenu==='subjects'?'active':'' ?>"><i class="fas fa-book-open"></i> Subjects</a>
+        <a href="timetable.php" class="nav-item <?= $activeMenu==='timetable'?'active':'' ?>"><i class="fas fa-calendar-alt"></i> Timetable</a>
 
         <span class="nav-section-title">Attendance & Exams</span>
-        <a href="attendance" class="nav-item <?= $activeMenu==='attendance'?'active':'' ?>"><i class="fas fa-clipboard-check"></i> Attendance</a>
-        <a href="exams"      class="nav-item <?= $activeMenu==='exams'?'active':'' ?>"><i class="fas fa-file-alt"></i> Exams</a>
-        <a href="marks"      class="nav-item <?= $activeMenu==='marks'?'active':'' ?>"><i class="fas fa-star-half-alt"></i> Marks & Results</a>
+        <a href="attendance.php" class="nav-item <?= $activeMenu==='attendance'?'active':'' ?>"><i class="fas fa-clipboard-check"></i> Attendance</a>
+        <a href="exams.php"      class="nav-item <?= $activeMenu==='exams'?'active':'' ?>"><i class="fas fa-file-alt"></i> Exams</a>
+        <a href="marks.php"      class="nav-item <?= $activeMenu==='marks'?'active':'' ?>"><i class="fas fa-star-half-alt"></i> Marks & Results</a>
 
         <span class="nav-section-title">Finance & Library</span>
-        <a href="fees"    class="nav-item <?= $activeMenu==='fees'?'active':'' ?>"><i class="fas fa-rupee-sign"></i> Fee Management</a>
-        <a href="library" class="nav-item <?= $activeMenu==='library'?'active':'' ?>"><i class="fas fa-book"></i> Library</a>
+        <a href="fees.php"    class="nav-item <?= $activeMenu==='fees'?'active':'' ?>"><i class="fas fa-rupee-sign"></i> Fee Management</a>
+        <a href="library.php" class="nav-item <?= $activeMenu==='library'?'active':'' ?>"><i class="fas fa-book"></i> Library</a>
 
         <span class="nav-section-title">Communication</span>
-        <a href="notices" class="nav-item <?= $activeMenu==='notices'?'active':'' ?>"><i class="fas fa-bullhorn"></i> Notices</a>
+        <a href="notices.php" class="nav-item <?= $activeMenu==='notices'?'active':'' ?>"><i class="fas fa-bullhorn"></i> Notices</a>
     </nav>
 
     <div class="sidebar-footer">
@@ -74,7 +74,7 @@ $notifNotices = db()->fetchAll("
                 <h4><?= htmlspecialchars($user['name']) ?></h4>
                 <span><?= $user['role'] ?></span>
             </div>
-            <a href="../logout" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
+            <a href="../logout.php" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </div>
 </aside>
