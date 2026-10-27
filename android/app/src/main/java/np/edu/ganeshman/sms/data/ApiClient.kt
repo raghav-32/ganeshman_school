@@ -21,6 +21,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 import java.util.concurrent.TimeUnit
 
 /** Error shown to the user. [errors] holds per-field messages (HTTP 422). */
@@ -137,6 +140,53 @@ class ApiClient(private val session: Session) {
     private fun String.authRequired(): Boolean =
         !(startsWith("auth/login") || startsWith("auth/register") || startsWith("auth/classes"))
 
+    // ---- InfinityFree "browser check" ------------------------------------------------
+    // The free host answers non-browser clients with a tiny JavaScript puzzle (AES-128-CBC):
+    //   a=toNumbers("key"), b=toNumbers("iv"), c=toNumbers("cipher") -> cookie __test = hex(decrypt(c))
+    // A browser solves it and then reloads. We do the same maths natively and retry once.
+    @Volatile private var hostCookie: String? = null
+
+    private fun looksLikeChallenge(body: String) = body.contains("toNumbers(") && body.contains("slowAES")
+
+    private fun solveChallenge(html: String): String? {
+        val parts = Regex("toNumbers\\(\"([0-9a-fA-F]+)\"\\)").findAll(html).map { it.groupValues[1] }.toList()
+        if (parts.size < 3) return null
+        fun bytes(h: String) = ByteArray(h.length / 2) { h.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+        return try {
+            val c = Cipher.getInstance("AES/CBC/NoPadding")
+            c.init(Cipher.DECRYPT_MODE, SecretKeySpec(bytes(parts[0]), "AES"), IvParameterSpec(bytes(parts[1])))
+            c.doFinal(bytes(parts[2])).joinToString("") { "%02x".format(it) }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun withHostCookie(req: Request): Request {
+        val c = hostCookie ?: return req
+        return req.newBuilder()
+            .header("Cookie", "__test=$c")
+            .url(req.url.newBuilder().setQueryParameter("i", "1").build())
+            .build()
+    }
+
+    private fun call(request: Request): Pair<Int, String> = try {
+        http.newCall(request).execute().use { r -> r.code to (r.body?.string() ?: "") }
+    } catch (e: IOException) {
+        throw ApiException("Can't reach the school server. Check your internet connection and try again.")
+    }
+
+    private fun fetch(original: Request): Pair<Int, String> {
+        var r = call(withHostCookie(original))
+        if (looksLikeChallenge(r.second)) {
+            val cookie = solveChallenge(r.second)
+            if (cookie != null) {
+                hostCookie = cookie
+                r = call(withHostCookie(original))
+            }
+        }
+        return r
+    }
+
     private suspend fun execute(builder: Request.Builder, auth: Boolean): JsonElement =
         withContext(Dispatchers.IO) {
             builder.header("Accept", "application/json")
@@ -144,11 +194,7 @@ class ApiClient(private val session: Session) {
             if (auth) session.token?.let { builder.header("Authorization", "Bearer $it") }
 
             val request = builder.build()
-            val (status, text) = try {
-                http.newCall(request).execute().use { r -> r.code to (r.body?.string() ?: "") }
-            } catch (e: IOException) {
-                throw ApiException("Can't reach the school server. Check your internet connection and try again.")
-            }
+            val (status, text) = fetch(request)
 
             val root: JsonObject = try {
                 Net.json.parseToJsonElement(text).jsonObject
