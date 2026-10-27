@@ -8,11 +8,16 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.ChevronLeft
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -201,67 +206,119 @@ fun RegisterScreen(onBack: () -> Unit, onDone: () -> Unit) {
     }
 }
 
-/** Date picker in Bikram Sambat (BS). Returns the chosen day as an AD LocalDate (the server stores AD). */
+/** Calendar-style date picker in Bikram Sambat (BS). Returns the chosen day as an AD LocalDate (the server stores AD). */
 @Composable
 fun BsDatePickerDialog(initial: LocalDate, onDismiss: () -> Unit, onPick: (LocalDate) -> Unit) {
+    val today = remember { LocalDate.now() }
+    val todayBs = remember { NepaliDate.fromAd(today) ?: Triple(NepaliDate.endYear, 12, 30) }
     val start = NepaliDate.fromAd(initial) ?: Triple(2070, 1, 1)
     var year by remember { mutableIntStateOf(start.first) }
     var month by remember { mutableIntStateOf(start.second) }
-    var day by remember { mutableIntStateOf(start.third) }
-    val maxDay = NepaliDate.daysIn(year, month)
-    if (day > maxDay) day = maxDay
-    val todayBs = remember { NepaliDate.fromAd(LocalDate.now()) }
-    val maxYear = todayBs?.first ?: NepaliDate.endYear
+    var yearMode by remember { mutableStateOf(false) }
+    val sel = Triple(start.first, start.second, start.third)
+    var chosen by remember { mutableStateOf(sel) }
+
+    fun step(delta: Int) {
+        var m = month + delta; var y = year
+        if (m < 1) { m = 12; y-- } else if (m > 12) { m = 1; y++ }
+        if (y < NepaliDate.START_YEAR || y > todayBs.first) return
+        year = y; month = m
+    }
 
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Surface,
-        title = { Text("Date of birth (BS)") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        title = {
+            Column {
+                Text("Date of birth (BS)", style = MaterialTheme.typography.labelLarge, color = InkSoft)
                 Text(
-                    "%d %s %d BS  •  %s AD".format(day, NepaliDate.monthNames[month - 1], year,
-                        NepaliDate.toAd(year, month, day).let { prettyDate(it.iso()) }),
-                    style = MaterialTheme.typography.titleSmall, color = BrandDark,
+                    "%d %s %d".format(chosen.third, NepaliDate.monthNames[chosen.second - 1], chosen.first),
+                    style = MaterialTheme.typography.headlineSmall,
                 )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    PickColumn("Year", (NepaliDate.START_YEAR..maxYear).toList().reversed(), year, { it.toString() }, Modifier.weight(1.1f)) { year = it }
-                    PickColumn("Month", (1..12).toList(), month, { NepaliDate.monthNames[it - 1] }, Modifier.weight(1.4f)) { month = it }
-                    PickColumn("Day", (1..maxDay).toList(), day, { it.toString() }, Modifier.weight(0.8f)) { day = it }
+            }
+        },
+        text = {
+            Column {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                            .clickable { yearMode = !yearMode }.padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("${NepaliDate.monthNames[month - 1]} $year", style = MaterialTheme.typography.titleSmall)
+                        Icon(
+                            if (yearMode) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null,
+                            Modifier.size(20.dp),
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    if (!yearMode) {
+                        androidx.compose.material3.IconButton(onClick = { step(-1) }) { Icon(Icons.Outlined.ChevronLeft, "Previous month") }
+                        androidx.compose.material3.IconButton(onClick = { step(1) }) { Icon(Icons.Outlined.ChevronRight, "Next month") }
+                    }
+                }
+                if (yearMode) {
+                    val years = remember { (NepaliDate.START_YEAR..todayBs.first).toList().reversed() }
+                    val st = androidx.compose.foundation.lazy.rememberLazyListState()
+                    LaunchedEffect(Unit) { years.indexOf(year).let { if (it > 2) st.scrollToItem(it - 2) } }
+                    androidx.compose.foundation.lazy.LazyColumn(Modifier.height(260.dp), state = st) {
+                        items(years.size) { i ->
+                            val y = years[i]; val on = y == year
+                            Box(
+                                Modifier.fillMaxWidth().padding(vertical = 2.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                                    .background(if (on) Brand else androidx.compose.ui.graphics.Color.Transparent)
+                                    .clickable { year = y; yearMode = false }.padding(vertical = 10.dp),
+                                contentAlignment = Alignment.Center,
+                            ) { Text(y.toString(), color = if (on) OnBrand else Ink) }
+                        }
+                    }
+                } else {
+                    Row(Modifier.fillMaxWidth()) {
+                        listOf("S", "M", "T", "W", "T", "F", "S").forEach {
+                            Text(it, Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                style = MaterialTheme.typography.labelMedium, color = InkSoft)
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    val lead = NepaliDate.toAd(year, month, 1).dayOfWeek.value % 7     // Sunday = 0
+                    val days = NepaliDate.daysIn(year, month)
+                    val cells = lead + days
+                    for (r in 0 until (cells + 6) / 7) {
+                        Row(Modifier.fillMaxWidth()) {
+                            for (c in 0 until 7) {
+                                val d = r * 7 + c - lead + 1
+                                Box(Modifier.weight(1f).aspectRatio(1f).padding(2.dp), contentAlignment = Alignment.Center) {
+                                    if (d in 1..days) {
+                                        val future = NepaliDate.toAd(year, month, d).isAfter(today)
+                                        val on = chosen == Triple(year, month, d)
+                                        val isToday = Triple(year, month, d) == todayBs
+                                        Box(
+                                            Modifier.fillMaxSize().clip(CircleShape)
+                                                .background(if (on) Brand else androidx.compose.ui.graphics.Color.Transparent)
+                                                .let { if (isToday && !on) it.border(1.dp, Brand, CircleShape) else it }
+                                                .let { if (future) it else it.clickable { chosen = Triple(year, month, d) } },
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Text(
+                                                d.toString(), style = MaterialTheme.typography.bodyMedium,
+                                                color = when { on -> OnBrand; future -> InkSoft.copy(alpha = 0.4f); else -> Ink },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Text("= %s AD".format(prettyDate(NepaliDate.toAd(chosen.first, chosen.second, chosen.third).iso())),
+                        style = MaterialTheme.typography.bodySmall, color = InkSoft, modifier = Modifier.padding(top = 6.dp))
                 }
             }
         },
         confirmButton = {
             androidx.compose.material3.TextButton(onClick = {
-                val ad = NepaliDate.toAd(year, month, day)
-                onPick(if (ad.isAfter(LocalDate.now())) LocalDate.now() else ad)
+                onPick(NepaliDate.toAd(chosen.first, chosen.second, chosen.third))
             }) { Text("OK") }
         },
         dismissButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
-}
-
-@Composable
-private fun PickColumn(
-    label: String, items: List<Int>, selected: Int, text: (Int) -> String, modifier: Modifier, onSelect: (Int) -> Unit,
-) {
-    val state = androidx.compose.foundation.lazy.rememberLazyListState()
-    LaunchedEffect(Unit) { items.indexOf(selected).let { if (it > 1) state.scrollToItem(it - 1) } }
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = InkSoft)
-        androidx.compose.foundation.lazy.LazyColumn(Modifier.height(200.dp), state = state) {
-            items(items.size) { i ->
-                val v = items[i]
-                val on = v == selected
-                Box(
-                    Modifier.fillMaxWidth().padding(vertical = 2.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-                        .background(if (on) Brand else androidx.compose.ui.graphics.Color.Transparent)
-                        .clickable { onSelect(v) }.padding(vertical = 9.dp, horizontal = 6.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(text(v), color = if (on) OnBrand else Ink, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
-                }
-            }
-        }
-    }
 }
