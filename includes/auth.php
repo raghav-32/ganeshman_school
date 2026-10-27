@@ -21,6 +21,10 @@ if (!defined('API_NO_SESSION') && session_status() === PHP_SESSION_NONE) {
         'samesite' => 'Lax'
     ]);
     session_start();
+    if (!headers_sent()) {   // pages must always show fresh data
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+    }
 }
 
 // -----------------------------------------------

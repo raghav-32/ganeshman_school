@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isLoading = true;
         barStart();
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, redirect: 'follow' })
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, redirect: 'follow', cache: 'no-store' })
         .then(function (res) {
             // If redirected to login, hard navigate
             if (res.url && res.url.indexOf('login.php') !== -1) { window.location.href = res.url; return null; }
@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sidebar) {
                 sidebar.querySelectorAll('.nav-item').forEach(function (a) { a.classList.remove('active'); });
                 var filename = url.split('/').pop().split('?')[0].split('#')[0].replace('.php','');
-                var active   = sidebar.querySelector('a.nav-item[href="' + filename + '"]');
+                var active   = sidebar.querySelector('a.nav-item[href="' + filename + '"], a.nav-item[href="' + filename + '.php"]');
                 if (active) active.classList.add('active');
             }
 
@@ -697,7 +697,8 @@ document.addEventListener('DOMContentLoaded', function() {
             method:   'POST',
             body:     fd,
             headers:  { 'X-Requested-With': 'XMLHttpRequest' },
-            redirect: 'follow'
+            redirect: 'follow',
+            cache:    'no-store'
         })
         .then(function (res) {
             // After POST, PHP does redirect() → fetch follows it → we get the GET page
@@ -727,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sidebar) {
                 var filename = result.url.split('/').pop().split('?')[0].replace('.php','');
                 sidebar.querySelectorAll('.nav-item').forEach(function (a) { a.classList.remove('active'); });
-                var al = sidebar.querySelector('a.nav-item[href="' + filename + '"]');
+                var al = sidebar.querySelector('a.nav-item[href="' + filename + '"], a.nav-item[href="' + filename + '.php"]');
                 if (al) al.classList.add('active');
             }
 

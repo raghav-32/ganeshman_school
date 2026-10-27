@@ -4,7 +4,7 @@
 // IMPORTANT: dynamic PHP pages (dashboards, notices, marks, etc.) are always
 // fetched fresh from the network — never cached — so data is never stale.
 
-const CACHE_NAME = 'gms-app-shell-v1';
+const CACHE_NAME = 'gms-app-shell-v2';
 
 // self.location reflects wherever this file was actually registered from
 // (root, /gms/, /ganeshman_school/, etc.), so these resolve correctly no

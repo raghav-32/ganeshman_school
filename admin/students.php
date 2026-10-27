@@ -8,15 +8,26 @@ $activeMenu = 'students';
 // ── Photo upload helper ──────────────────────────────────────
 function uploadStudentPhoto(): ?string {
     if (empty($_FILES['photo']['name'])) return null;
-    $file    = $_FILES['photo'];
+    $file = $_FILES['photo'];
+    if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        $GLOBALS['photo_error'] = 'Photo upload failed (the file is probably too large for the server). Please use a smaller image.';
+        return null;
+    }
     $allowed = ['image/jpeg','image/png','image/gif','image/webp'];
-    if (!in_array($file['type'], $allowed)) return null;
-    if ($file['size'] > 2 * 1024 * 1024) return null; // 2MB max
+    if (!in_array($file['type'], $allowed)) {
+        $GLOBALS['photo_error'] = 'Photo must be a JPG, PNG, GIF or WebP image.';
+        return null;
+    }
+    if ($file['size'] > 2 * 1024 * 1024) {
+        $GLOBALS['photo_error'] = 'Photo is larger than 2 MB. Please choose a smaller image.';
+        return null;
+    }
     $ext  = pathinfo($file['name'], PATHINFO_EXTENSION);
     $name = 'student_' . time() . '_' . mt_rand(1000,9999) . '.' . $ext;
     $dir  = '../assets/uploads/students/';
     if (!is_dir($dir)) mkdir($dir, 0755, true);
     if (move_uploaded_file($file['tmp_name'], $dir . $name)) return $name;
+    $GLOBALS['photo_error'] = 'Could not save the photo on the server.';
     return null;
 }
 
@@ -38,6 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $classId      = (int)($_POST['class_id']            ?? 0);
         $admDate      = sanitize($_POST['admission_date']   ?? date('Y-m-d'));
         $photo        = uploadStudentPhoto();
+        if (!empty($GLOBALS['photo_error'])) {   // don't silently ignore a rejected photo
+            setFlash('danger', $GLOBALS['photo_error']);
+            redirect('students.php');
+        }
 
         if ($action === 'add') {
             $username   = sanitize($_POST['username'] ?? '');
