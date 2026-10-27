@@ -137,8 +137,9 @@ class ApiClient(private val session: Session) {
             builder.header("User-Agent", "GMS-Android/1.0")
             if (auth) session.token?.let { builder.header("Authorization", "Bearer $it") }
 
+            val request = builder.build()
             val (status, text) = try {
-                http.newCall(builder.build()).execute().use { r -> r.code to (r.body?.string() ?: "") }
+                http.newCall(request).execute().use { r -> r.code to (r.body?.string() ?: "") }
             } catch (e: IOException) {
                 throw ApiException("Can't reach the school server. Check your internet connection and try again.")
             }
@@ -147,8 +148,16 @@ class ApiClient(private val session: Session) {
                 Net.json.parseToJsonElement(text).jsonObject
             } catch (e: Exception) {
                 // Free hosts (e.g. InfinityFree) sometimes answer API calls with an HTML bot-check page.
+                val hint = when {
+                    text.contains("slowAES", true) || text.contains("__test", true) || text.contains("aes.js", true) ->
+                        "Host bot-check page (InfinityFree) blocked the app."
+                    text.contains("<html", true) || text.contains("<!doctype", true) -> "Got a web page instead of JSON."
+                    text.isBlank() -> "Empty reply."
+                    else -> "Not JSON."
+                }
+                val preview = text.replace(Regex("<[^>]*>"), " ").replace(Regex("\\s+"), " ").trim().take(140)
                 throw ApiException(
-                    "The server sent an unexpected reply (HTTP $status). Please try again in a moment.",
+                    "Unexpected server reply (HTTP $status). $hint\nURL: ${request.url}\n$preview",
                     status,
                 )
             }
