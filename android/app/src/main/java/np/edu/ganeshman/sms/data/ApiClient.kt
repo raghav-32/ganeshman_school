@@ -175,13 +175,27 @@ class ApiClient(private val session: Session) {
         throw ApiException("Can't reach the school server. Check your internet connection and try again.")
     }
 
+    private fun isJsonBody(body: String) = body.trimStart().startsWith("{")
+
     private fun fetch(original: Request): Pair<Int, String> {
         var r = call(withHostCookie(original))
         if (looksLikeChallenge(r.second)) {
             val cookie = solveChallenge(r.second)
             if (cookie != null) {
                 hostCookie = cookie
+                http.connectionPool.evictAll()          // the host can reject the reused connection (400)
                 r = call(withHostCookie(original))
+            }
+        }
+        // The free host sometimes answers with an HTML error (400/5xx) just after the check. Retry quietly.
+        var tries = 0
+        while (tries < 3 && hostCookie != null && !isJsonBody(r.second)) {
+            tries++
+            Thread.sleep(500L * tries)
+            http.connectionPool.evictAll()
+            r = call(withHostCookie(original))
+            if (looksLikeChallenge(r.second)) {
+                solveChallenge(r.second)?.let { hostCookie = it }
             }
         }
         return r
