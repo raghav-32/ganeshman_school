@@ -2,7 +2,7 @@ package np.edu.ganeshman.sms.ui.common
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,7 +15,7 @@ import np.edu.ganeshman.sms.ui.student.NoticeCard
 import np.edu.ganeshman.sms.ui.theme.*
 
 @Composable
-fun NoticesScreen(student: Boolean, onBack: () -> Unit) {
+fun NoticesScreen(student: Boolean, onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
     val state = rememberAsync { if (student) repo.studentNotices() else repo.teacherNotices() }
     Screen("Notices", onBack = onBack) {
@@ -37,30 +37,45 @@ fun ProfileScreen(onBack: () -> Unit) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Avatar(p.fullName, p.photoUrl, 96.dp)
                 Text(p.fullName, style = MaterialTheme.typography.headlineSmall)
-                Text(p.code, style = MaterialTheme.typography.bodyMedium, color = InkSoft)
-                p.klass?.let { Chip(it.label) }
+                Text(listOfNotNull(p.code.ifBlank { null }, p.klass?.label).joinToString(" • "), style = MaterialTheme.typography.bodyMedium, color = InkSoft)
             }
-            Panel {
-                KeyValue("Username", p.username)
-                KeyValue("Date of birth", listOfNotNull(prettyDate(p.dob).ifBlank { null }, p.dobBs).joinToString("  •  "))
-                KeyValue("Gender", p.gender)
-                KeyValue("Phone", p.phone)
-                KeyValue("Email", p.email)
-                KeyValue("Address", p.address)
-                KeyValue("Qualification", p.qualification)
-                KeyValue("Joined", p.joiningDateBs ?: prettyDate(p.joiningDate))
-                KeyValue("Admitted", p.admissionDateBs ?: prettyDate(p.admissionDate))
+            Panel(padding = 8.dp) {
+                InfoRow(Icons.Outlined.Person, "Full Name", p.fullName)
+                InfoRow(Icons.Outlined.AccountCircle, "Username", p.username)
+                InfoRow(Icons.Outlined.School, "Class", p.klass?.label)
+                InfoRow(Icons.Outlined.Badge, "ID", p.code)
+                InfoRow(Icons.Outlined.Cake, "Date of Birth", listOfNotNull(prettyDate(p.dob).ifBlank { null }, p.dobBs?.let { "$it (BS)" }).joinToString("  •  "))
+                InfoRow(Icons.Outlined.Wc, "Gender", p.gender)
+                InfoRow(Icons.Outlined.Call, "Contact", p.phone)
+                InfoRow(Icons.Outlined.Email, "Email", p.email)
+                InfoRow(Icons.Outlined.LocationOn, "Address", p.address)
+                InfoRow(Icons.Outlined.WorkspacePremium, "Qualification", p.qualification)
+                InfoRow(Icons.Outlined.Event, "Joined", p.joiningDateBs ?: prettyDate(p.joiningDate))
+                InfoRow(Icons.Outlined.Event, "Admitted", p.admissionDateBs ?: prettyDate(p.admissionDate))
             }
-            if (p.isStudent) Panel {
-                Text("Guardian", style = MaterialTheme.typography.titleSmall)
-                KeyValue("Name", p.guardianName)
-                KeyValue("Phone", p.guardianPhone)
-                KeyValue("Relation", p.guardianRelation)
+            if (p.isStudent) Panel(padding = 8.dp) {
+                Text("Guardian", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(start = 8.dp, top = 8.dp))
+                InfoRow(Icons.Outlined.Person, "Name", p.guardianName)
+                InfoRow(Icons.Outlined.Call, "Phone", p.guardianPhone)
+                InfoRow(Icons.Outlined.FamilyRestroom, "Relation", p.guardianRelation)
             }
             BigButton("Change password", { pwOpen = true }, outlined = true)
         }
     }
     if (pwOpen) ChangePasswordSheet { pwOpen = false }
+}
+
+@Composable
+private fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String?) {
+    if (value.isNullOrBlank()) return
+    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = InkSoft, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(14.dp))
+        Column {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = InkSoft)
+            Text(value, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

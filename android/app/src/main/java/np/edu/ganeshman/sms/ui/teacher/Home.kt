@@ -20,22 +20,18 @@ fun TeacherHome(nav: NavHostController) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.teacherDashboard() }
     var sheet by remember { mutableStateOf(false) }
-    FabEffect(FabSpec(Icons.Outlined.Add, onClick = { sheet = true }))
+    FabEffect(FabSpec(Icons.Outlined.Add, rotated = sheet, onClick = { sheet = true }))
 
-    Screen("Home") {
+    val me by repo.session.data.collectAsState()
+    val first = me?.profile?.firstName.orEmpty()
+    Screen(
+        title = if (first.isBlank()) greeting() else "${greeting()}, $first",
+        subtitle = state.load.dataOrNull()?.today?.let { listOfNotNull(it.weekday.ifBlank { null }, it.dateBs).joinToString(" • ") },
+    ) {
         AsyncContent(state, skeletons = 4) { d ->
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Avatar(d.teacher.fullName, d.teacher.photoUrl, 56.dp)
-                Column(Modifier.weight(1f)) {
-                    Text(greeting(), style = MaterialTheme.typography.bodyMedium, color = InkSoft)
-                    Text(d.teacher.firstName.ifBlank { d.teacher.fullName }, style = MaterialTheme.typography.headlineSmall)
-                    Text(listOfNotNull(d.today.weekday.ifBlank { null }, d.today.dateBs).joinToString(" • "),
-                        style = MaterialTheme.typography.bodySmall, color = InkSoft)
-                }
-            }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatTile("${d.classes.size}", "My classes", PastelBlue, OnBlue, Modifier.weight(1f))
-                StatTile("${d.classesMarkedToday}", "Marked today", PastelGreen, OnGreen, Modifier.weight(1f))
+                IconTile(Icons.Outlined.Groups, "${d.classes.size}", "My Classes", PastelBlue, OnBlue, Modifier.weight(1f))
+                IconTile(Icons.Outlined.CheckCircle, "${d.classesMarkedToday}", "Marked Today", PastelGreen, OnGreen, Modifier.weight(1f))
             }
             SectionTitle("My classes")
             if (d.classes.isEmpty()) {

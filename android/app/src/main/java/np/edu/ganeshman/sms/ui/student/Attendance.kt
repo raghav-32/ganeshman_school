@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.*
@@ -32,12 +33,31 @@ fun statusColors(s: String): Pair<Color, Color> = when (s.lowercase()) {
 }
 
 @Composable
-fun StudentAttendanceScreen() {
+fun StudentAttendanceScreen(onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
     var month by remember { mutableStateOf(YearMonth.now()) }
     val state = rememberAsync(month) { repo.studentAttendance(month.toString()) }
+    var overall by remember { mutableStateOf<np.edu.ganeshman.sms.data.AttendanceSummary?>(null) }
+    val data = state.load.dataOrNull()
+    LaunchedEffect(data) { data?.let { overall = it.summary } }
 
-    Screen("Attendance") {
+    Screen("My Attendance", onBack = onBack) {
+        overall?.let { o ->
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Ring((o.percentage / 100).toFloat(), pctColor(o.percentage), size = 130.dp, stroke = 12.dp, label = "${num(o.percentage)}%")
+                Text("Overall Attendance", style = MaterialTheme.typography.titleSmall)
+                Text("${o.present} / ${o.total} Days", style = MaterialTheme.typography.bodyMedium, color = InkSoft)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                IconTile(Icons.Outlined.CheckCircle, "${o.present}", "Present", PastelGreen, OnGreen, Modifier.weight(1f))
+                IconTile(Icons.Outlined.Cancel, "${o.absent}", "Absent", PastelPink, OnPink, Modifier.weight(1f))
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                IconTile(Icons.Outlined.EventBusy, "${o.leave}", "Leave", PastelYellow, OnYellow, Modifier.weight(1f))
+                IconTile(Icons.Outlined.CalendarMonth, "${o.total}", "Total Days", PastelBlue, OnBlue, Modifier.weight(1f))
+            }
+        }
+        SectionTitle("Monthly Attendance")
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { month = month.minusMonths(1) }) { Icon(Icons.Outlined.ChevronLeft, "Previous month") }
             Text(
@@ -49,12 +69,6 @@ fun StudentAttendanceScreen() {
             }
         }
         AsyncContent(state) { d ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StatTile("${d.monthSummary.present}", "Present", PastelGreen, OnGreen, Modifier.weight(1f))
-                StatTile("${d.monthSummary.absent}", "Absent", PastelPink, OnPink, Modifier.weight(1f))
-                StatTile("${d.monthSummary.late}", "Late", PastelYellow, OnYellow, Modifier.weight(1f))
-                StatTile("${d.monthSummary.leave}", "Leave", PastelBlue, OnBlue, Modifier.weight(1f))
-            }
             if (d.records.isEmpty()) {
                 EmptyState(Illustration.Calendar, "No records", "Nothing was marked for this month.")
             } else {

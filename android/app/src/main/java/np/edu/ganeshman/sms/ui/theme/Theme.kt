@@ -14,14 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // Soft off-white canvas + school-green brand + pastel accents.
-val Canvas = Color(0xFFF7F8F5)
+val Canvas = Color(0xFFF8F8FB)
 val Surface = Color(0xFFFFFFFF)
-val Ink = Color(0xFF1B2420)
-val InkSoft = Color(0xFF66726B)
-val Line = Color(0xFFE6EAE4)
-val Brand = Color(0xFF2F7D5B)
-val BrandDark = Color(0xFF1F5C42)
-val BrandSoft = Color(0xFFD6EBE3)
+val Ink = Color(0xFF1C1D2B)
+val InkSoft = Color(0xFF6B6E80)
+val Line = Color(0xFFE8E9F0)
+val Brand = Color(0xFF6C6FD8)
+val BrandDark = Color(0xFF4A4DB3)
+val BrandSoft = Color(0xFFE7E8FB)
 
 val PastelGreen = Color(0xFFDDF0E4)
 val PastelBlue = Color(0xFFDCE8F7)
@@ -55,7 +55,7 @@ private val scheme = lightColorScheme(
     onBackground = Ink,
     surface = Surface,
     onSurface = Ink,
-    surfaceVariant = Color(0xFFEEF2EC),
+    surfaceVariant = Color(0xFFEFF0F7),
     onSurfaceVariant = InkSoft,
     outline = Line,
     outlineVariant = Line,

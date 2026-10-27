@@ -5,6 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,8 +21,12 @@ private val dayNames = mapOf(
     "Thursday" to "बिही", "Friday" to "शुक्र", "Saturday" to "शनि",
 )
 
+private val periodColors = listOf(
+    PastelBlue to OnBlue, PastelPeach to OnPeach, PastelGreen to OnGreen, PastelLilac to OnLilac, PastelYellow to OnYellow,
+)
+
 @Composable
-fun TimetableScreen(onBack: () -> Unit) {
+fun TimetableScreen(onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.timetable() }
     var picked by remember { mutableStateOf<String?>(null) }
@@ -35,18 +41,20 @@ fun TimetableScreen(onBack: () -> Unit) {
             val day = t.days.first { it.day == sel }
             if (day.periods.isEmpty()) {
                 EmptyState(Illustration.Calendar, "No classes", "Nothing scheduled on $sel.")
-            } else day.periods.forEach { p ->
+            } else day.periods.forEachIndexed { i, p ->
+                val (bg, fg) = periodColors[i % periodColors.size]
                 Panel {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Column(Modifier.width(64.dp)) {
-                            Text(hhmm(p.startTime), style = MaterialTheme.typography.titleSmall)
-                            Text(hhmm(p.endTime), style = MaterialTheme.typography.bodySmall, color = InkSoft)
-                        }
+                        Box(
+                            Modifier.size(40.dp).clip(androidx.compose.foundation.shape.CircleShape).background(bg),
+                            contentAlignment = Alignment.Center,
+                        ) { Text("${i + 1}", style = MaterialTheme.typography.titleSmall, color = fg) }
                         Column(Modifier.weight(1f)) {
                             Text(p.subjectName, style = MaterialTheme.typography.titleSmall)
-                            Text(p.teacherName, style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                            Text(hhmm(p.startTime) + " - " + hhmm(p.endTime), style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                            val sub = listOfNotNull(p.roomNumber?.takeIf { it.isNotBlank() }?.let { "Room $it" }, p.teacherName.ifBlank { null })
+                            if (sub.isNotEmpty()) Text(sub.joinToString(" • "), style = MaterialTheme.typography.bodySmall, color = InkSoft)
                         }
-                        if (!p.roomNumber.isNullOrBlank()) Chip("Room ${p.roomNumber}", PastelBlue, OnBlue)
                     }
                 }
             }
@@ -99,10 +107,16 @@ fun FeesScreen(onBack: () -> Unit) {
     val state = rememberAsync { repo.fees() }
     Screen("Fees", onBack = onBack) {
         AsyncContent(state) { d ->
+            Panel(color = BrandSoft, padding = 20.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Total Due", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                    if (d.summary.totalDue <= 0.0) Chip("No dues", PastelGreen, OnGreen) else Chip("Payment pending", PastelYellow, OnYellow)
+                }
+                Text(money(d.summary.totalDue), style = MaterialTheme.typography.headlineLarge, color = BrandDark)
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatTile(money(d.summary.totalFee), "Total", PastelBlue, OnBlue, Modifier.weight(1f))
-                StatTile(money(d.summary.totalPaid), "Paid", PastelGreen, OnGreen, Modifier.weight(1f))
-                StatTile(money(d.summary.totalDue), "Due", PastelYellow, OnYellow, Modifier.weight(1f))
+                IconTile(Icons.Outlined.Receipt, money(d.summary.totalFee), "Total Fee", PastelBlue, OnBlue, Modifier.weight(1f))
+                IconTile(Icons.Outlined.CheckCircle, money(d.summary.totalPaid), "Paid", PastelGreen, OnGreen, Modifier.weight(1f))
             }
             if (d.fees.isEmpty()) {
                 EmptyState(Illustration.Money, "No fees", "No fee structure has been assigned to your class.")
@@ -119,7 +133,7 @@ fun FeesScreen(onBack: () -> Unit) {
                 }
             }
             if (d.payments.isNotEmpty()) {
-                SectionTitle("Payment history")
+                SectionTitle("Recent Transactions")
                 d.payments.forEach { p ->
                     Panel(padding = 14.dp) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -162,16 +176,20 @@ fun LibraryScreen(onBack: () -> Unit) {
         }
     }
 
+    var tab by remember { mutableStateOf("Books") }
     Screen("Library", onBack = onBack) {
-        Field(
+        PillSelector(listOf("Books", "Borrowed"), tab, { it }) { tab = it }
+        message?.let { Text(it, color = Bad, style = MaterialTheme.typography.bodySmall) }
+        if (tab == "Books") Field(
             query, { query = it }, "Search books", trailing = {
                 IconButton(onClick = { submitted = query.trim() }) { Icon(Icons.Outlined.Search, "Search") }
             },
         )
-        message?.let { Text(it, color = Bad, style = MaterialTheme.typography.bodySmall) }
         AsyncContent(state) { d ->
-            if (d.myIssued.isNotEmpty()) {
-                SectionTitle("Borrowed by me")
+            if (tab == "Borrowed") {
+                if (d.myIssued.isEmpty() && d.myRequests.isEmpty()) {
+                    EmptyState(Illustration.Books, "Nothing borrowed", "Books you borrow or request will appear here.")
+                }
                 d.myIssued.forEach { b ->
                     Panel {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -184,9 +202,7 @@ fun LibraryScreen(onBack: () -> Unit) {
                         }
                     }
                 }
-            }
-            if (d.myRequests.isNotEmpty()) {
-                SectionTitle("My requests")
+                if (d.myRequests.isNotEmpty()) SectionTitle("My requests")
                 d.myRequests.forEach { r ->
                     Panel {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -199,22 +215,22 @@ fun LibraryScreen(onBack: () -> Unit) {
                         }
                     }
                 }
-            }
-            SectionTitle("Catalogue")
-            if (d.books.isEmpty()) {
-                EmptyState(Illustration.Books, "No books found", "Try a different title or author.")
-            } else d.books.forEach { b ->
-                Panel {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        IconBubble(Icons.Outlined.MenuBook, PastelPeach, OnPeach)
-                        Column(Modifier.weight(1f)) {
-                            Text(b.title, style = MaterialTheme.typography.titleSmall)
-                            Text(listOfNotNull(b.author, b.category).joinToString(" • "), style = MaterialTheme.typography.bodySmall, color = InkSoft)
-                            Text("${b.availableCopies}/${b.totalCopies} available" + (b.shelfLocation?.let { " • Shelf $it" } ?: ""),
-                                style = MaterialTheme.typography.labelSmall, color = InkSoft)
+            } else {
+                if (d.books.isEmpty()) {
+                    EmptyState(Illustration.Books, "No books found", "Try a different title or author.")
+                } else d.books.forEach { b ->
+                    Panel {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            IconBubble(Icons.Outlined.MenuBook, PastelBlue, OnBlue)
+                            Column(Modifier.weight(1f)) {
+                                Text(b.title, style = MaterialTheme.typography.titleSmall)
+                                Text(listOfNotNull(b.author, b.category).joinToString(" • "), style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                                Text("${b.availableCopies}/${b.totalCopies} available" + (b.shelfLocation?.let { " • Shelf $it" } ?: ""),
+                                    style = MaterialTheme.typography.labelSmall, color = InkSoft)
+                            }
+                            if (b.requested) Chip("Requested", BrandSoft, BrandDark)
+                            else TextButton(onClick = { act { repo.requestBook(b.id) } }, enabled = !busy) { Text("View / Request", color = Brand) }
                         }
-                        if (b.requested) Chip("Requested", PastelBlue, OnBlue)
-                        else TextButton(onClick = { act { repo.requestBook(b.id) } }, enabled = !busy) { Text("Request", color = Brand) }
                     }
                 }
             }
@@ -226,12 +242,12 @@ fun LibraryScreen(onBack: () -> Unit) {
 fun StudentMore(nav: androidx.navigation.NavHostController) {
     MoreList(
         listOf(
-            MoreItem("Timetable", "Weekly class schedule", Icons.Outlined.Schedule, PastelBlue, OnBlue, Routes.S_TIMETABLE),
-            MoreItem("Exams", "Schedules and status", Icons.Outlined.Quiz, PastelLilac, OnLilac, Routes.S_EXAMS),
-            MoreItem("Fees", "Dues and payments", Icons.Outlined.Payments, PastelYellow, OnYellow, Routes.S_FEES),
+            MoreItem("My Attendance", "Overall and monthly", Icons.Outlined.EventAvailable, PastelGreen, OnGreen, Routes.S_ATT),
+            MoreItem("My Results", "Published exam results", Icons.Outlined.EmojiEvents, PastelLilac, OnLilac, Routes.S_RESULTS),
+            MoreItem("Exam Schedule", "Dates and subjects", Icons.Outlined.Quiz, PastelBlue, OnBlue, Routes.S_EXAMS),
+            MoreItem("My Fees", "Dues and payments", Icons.Outlined.Payments, PastelYellow, OnYellow, Routes.S_FEES),
             MoreItem("Library", "Borrow and request books", Icons.Outlined.MenuBook, PastelPeach, OnPeach, Routes.S_LIBRARY),
-            MoreItem("Notices", "School announcements", Icons.Outlined.Campaign, PastelPink, OnPink, Routes.S_NOTICES),
-            MoreItem("Profile", "Your details and password", Icons.Outlined.Person, PastelGreen, OnGreen, Routes.S_PROFILE),
+            MoreItem("My Profile", "Details and password", Icons.Outlined.Person, PastelPink, OnPink, Routes.S_PROFILE),
         ),
         nav,
     )

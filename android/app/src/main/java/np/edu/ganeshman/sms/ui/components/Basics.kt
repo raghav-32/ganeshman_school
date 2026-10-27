@@ -40,11 +40,15 @@ import coil.compose.AsyncImage
 import np.edu.ganeshman.sms.data.fixUrl
 import np.edu.ganeshman.sms.ui.theme.*
 
+/** When set (top-level screens), a round profile picture is shown at the top right, like Gmail. */
+val LocalOpenProfile = staticCompositionLocalOf<(() -> Unit)?> { null }
+
 /** Standard page: soft canvas, title row with optional back button, scrolling body. */
 @Composable
 fun Screen(
     title: String,
     onBack: (() -> Unit)? = null,
+    subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
     bottomSpace: Dp = 120.dp,
     content: @Composable ColumnScope.() -> Unit,
@@ -66,14 +70,26 @@ fun Screen(
                     Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                 }
             }
-            Text(
-                title,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Column(Modifier.weight(1f)) {
+                Text(
+                    title,
+                    style = if (subtitle != null) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (subtitle != null) Text(
+                    subtitle, style = MaterialTheme.typography.bodySmall, color = InkSoft,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis,
+                )
+            }
             actions()
+            val openProfile = LocalOpenProfile.current
+            if (onBack == null && openProfile != null) {
+                val me by np.edu.ganeshman.sms.ui.common.LocalRepo.current.session.data.collectAsState()
+                Box(Modifier.padding(start = 8.dp).clip(CircleShape).clickable(onClick = openProfile)) {
+                    Avatar(me?.profile?.fullName ?: "", me?.profile?.photoUrl, 40.dp)
+                }
+            }
         }
         Column(
             Modifier

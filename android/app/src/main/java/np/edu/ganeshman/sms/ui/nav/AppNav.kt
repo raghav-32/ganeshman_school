@@ -33,8 +33,8 @@ import np.edu.ganeshman.sms.ui.common.ProfileScreen
 
 private val studentTabs = listOf(
     NavItem(Routes.S_HOME, "Home", Icons.Outlined.Home),
-    NavItem(Routes.S_ATT, "Attendance", Icons.Outlined.EventAvailable),
-    NavItem(Routes.S_RESULTS, "Results", Icons.Outlined.EmojiEvents),
+    NavItem(Routes.S_TIMETABLE, "Timetable", Icons.Outlined.Schedule),
+    NavItem(Routes.S_NOTICES, "Notices", Icons.Outlined.Notifications),
     NavItem(Routes.S_MORE, "More", Icons.Outlined.Apps),
 )
 private val teacherTabs = listOf(
@@ -51,7 +51,6 @@ private fun tabFor(route: String?, student: Boolean): String {
     if (route == null) return tabs.first().route
     return when {
         tabs.any { it.route == route } -> route
-        route == Routes.S_RESULT -> Routes.S_RESULTS
         route == Routes.T_ENTRY -> Routes.T_MARKS
         else -> more
     }
@@ -100,7 +99,11 @@ fun AppRoot() {
         }
     }
 
-    CompositionLocalProvider(LocalFabHost provides fabHost) {
+    val openProfile: (() -> Unit)? = session?.let { sd ->
+        { nav.navigate(if (sd.isStudent) Routes.S_PROFILE else Routes.T_PROFILE) { launchSingleTop = true } }
+    }
+
+    CompositionLocalProvider(LocalFabHost provides fabHost, LocalOpenProfile provides openProfile) {
         Box(Modifier.fillMaxSize()) {
             NavHost(nav, startDestination = start) {
                 composable(Routes.LOGIN) {
@@ -127,18 +130,18 @@ fun AppRoot() {
 
                 // ---------------- student ----------------
                 composable(Routes.S_HOME) { StudentHome(nav) }
-                composable(Routes.S_ATT) { StudentAttendanceScreen() }
-                composable(Routes.S_RESULTS) { ResultsScreen(onOpen = { nav.navigate(Routes.result(it)) }) }
+                composable(Routes.S_ATT) { StudentAttendanceScreen(onBack = { nav.popBackStack() }) }
+                composable(Routes.S_RESULTS) { ResultsScreen(onOpen = { nav.navigate(Routes.result(it)) }, onBack = { nav.popBackStack() }) }
                 composable(Routes.S_MORE) { StudentMore(nav) }
                 composable(
                     Routes.S_RESULT,
                     arguments = listOf(navArgument("id") { type = NavType.IntType }),
                 ) { e -> ResultDetailScreen(e.arguments?.getInt("id") ?: 0, onBack = { nav.popBackStack() }) }
-                composable(Routes.S_TIMETABLE) { TimetableScreen(onBack = { nav.popBackStack() }) }
+                composable(Routes.S_TIMETABLE) { TimetableScreen() }
                 composable(Routes.S_EXAMS) { ExamsScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.S_FEES) { FeesScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.S_LIBRARY) { LibraryScreen(onBack = { nav.popBackStack() }) }
-                composable(Routes.S_NOTICES) { NoticesScreen(student = true, onBack = { nav.popBackStack() }) }
+                composable(Routes.S_NOTICES) { NoticesScreen(student = true) }
                 composable(Routes.S_PROFILE) { ProfileScreen(onBack = { nav.popBackStack() }) }
 
                 // ---------------- teacher ----------------

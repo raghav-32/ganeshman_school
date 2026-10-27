@@ -80,3 +80,21 @@ fun StatTile(value: String, caption: String, bg: Color, fg: Color, modifier: Mod
         Text(caption, style = MaterialTheme.typography.labelMedium, color = fg.copy(alpha = 0.8f))
     }
 }
+
+
+/** Pastel tile with a small icon, a big value and a caption (2x2 grids on home/attendance). */
+@Composable
+fun IconTile(icon: ImageVector, value: String, caption: String, bg: Color, fg: Color, modifier: Modifier = Modifier) {
+    Column(
+        modifier.clip(RoundedCornerShape(24.dp)).background(bg).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(Modifier.size(30.dp).clip(RoundedCornerShape(10.dp)).background(Color.White.copy(alpha = 0.7f)), contentAlignment = Alignment.Center) {
+            Icon(icon, null, tint = fg, modifier = Modifier.size(18.dp))
+        }
+        Column {
+            Text(value, style = MaterialTheme.typography.titleLarge, color = Ink)
+            Text(caption, style = MaterialTheme.typography.labelMedium, color = InkSoft)
+        }
+    }
+}

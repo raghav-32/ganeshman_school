@@ -3,7 +3,7 @@ package np.edu.ganeshman.sms.ui.student
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -13,13 +13,17 @@ import np.edu.ganeshman.sms.ui.components.*
 import np.edu.ganeshman.sms.ui.theme.*
 
 @Composable
-fun ResultsScreen(onOpen: (Int) -> Unit) {
+fun ResultsScreen(onOpen: (Int) -> Unit, onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.results() }
-    Screen("Results") {
-        AsyncContent(state) { list ->
+    var filter by remember { mutableStateOf("All") }
+    Screen("My Results", onBack = onBack) {
+        AsyncContent(state) { all ->
+            val types = listOf("All") + all.map { it.examType }.filter { it.isNotBlank() }.distinct()
+            if (types.size > 2) PillSelector(types, filter, { it }) { filter = it }
+            val list = if (filter == "All") all else all.filter { it.examType == filter }
             if (list.isEmpty()) {
-                EmptyState(Illustration.Results, "No results yet", "Published exam results will appear here.")
+                EmptyState(Illustration.Results, "No results published yet.", "Your exam results will appear here once they are published.")
             } else list.forEach { r ->
                 Panel(onClick = { onOpen(r.examId) }) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -30,7 +34,7 @@ fun ResultsScreen(onOpen: (Int) -> Unit) {
                                 style = MaterialTheme.typography.bodySmall, color = InkSoft,
                             )
                         }
-                        Chip("${num(r.percentage)}%", PastelGreen, OnGreen)
+                        Chip("${num(r.percentage)}%", BrandSoft, BrandDark)
                     }
                     Bar((r.percentage / 100).toFloat(), pctColor(r.percentage))
                     Text("${num(r.totalObtained)} / ${num(r.totalFull)} • ${r.subjectCount} subjects",

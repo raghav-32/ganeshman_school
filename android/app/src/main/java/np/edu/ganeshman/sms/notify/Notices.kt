@@ -65,7 +65,7 @@ object NoticeAlerts {
                         .setContentTitle(n.title)
                         .setContentText(n.content)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(n.content))
-                        .setColor(0xFF2F7D5B.toInt())
+                        .setColor(0xFF6C6FD8.toInt())
                         .setAutoCancel(true)
                         .setContentIntent(open)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)

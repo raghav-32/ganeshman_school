@@ -8,6 +8,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +29,22 @@ data class MoreItem(val title: String, val subtitle: String, val icon: ImageVect
 fun MoreList(items: List<MoreItem>, nav: NavHostController) {
     val repo = LocalRepo.current
     val scope = rememberCoroutineScope()
+    val me by repo.session.data.collectAsState()
+    val profileRoute = if (me?.isStudent == false) Routes.T_PROFILE else Routes.S_PROFILE
     Screen("More") {
+        me?.let { m ->
+            Panel(onClick = { nav.navigate(profileRoute) }, padding = 16.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    np.edu.ganeshman.sms.ui.components.Avatar(m.profile.fullName, m.profile.photoUrl, 56.dp)
+                    Column(Modifier.weight(1f)) {
+                        Text(m.profile.fullName, style = MaterialTheme.typography.titleMedium)
+                        Text(listOfNotNull(m.profile.code.ifBlank { null }, m.profile.klass?.label).joinToString(" • "),
+                            style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                    }
+                    Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = InkSoft)
+                }
+            }
+        }
         items.forEach { i ->
             Panel(onClick = { nav.navigate(i.route) }, padding = 14.dp) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
