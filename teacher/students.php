@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/auth.php';
 requireRole('teacher', '../index.php');
+ensureStudentColumns();
 
 $pageTitle  = 'My Students';
 $activeMenu = 'students';

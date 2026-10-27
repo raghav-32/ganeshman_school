@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/auth.php';
 requireRole('admin', '../index.php');
+ensureStudentColumns();
 
 $pageTitle  = 'Student Management';
 $activeMenu = 'students';
@@ -133,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 @unlink('../assets/uploads/students/' . $old['photo']);
             }
             // Keep the login account's email in sync with the student's contact email
-            db()->execute(
+            if ($saved) db()->execute(
                 "UPDATE users u INNER JOIN students s ON u.id = s.user_id SET u.email=? WHERE s.id=?",
                 'si', [$email, $id]
             );

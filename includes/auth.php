@@ -158,6 +158,40 @@ function hashPassword(string $password): string {
 // -----------------------------------------------
 // Sanitize input
 // -----------------------------------------------
+// -----------------------------------------------
+// Self-healing schema: add student columns that older databases are missing
+// (e.g. students.email), so pages don't fail with "Unknown column".
+// -----------------------------------------------
+function ensureStudentColumns(): void {
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    $want = [
+        'email'             => "VARCHAR(100) NULL",
+        'address'           => "TEXT NULL",
+        'phone'             => "VARCHAR(15) NULL",
+        'guardian_name'     => "VARCHAR(100) NULL",
+        'guardian_phone'    => "VARCHAR(15) NULL",
+        'guardian_relation' => "VARCHAR(30) NULL",
+        'admission_date'    => "DATE NULL",
+        'photo'             => "VARCHAR(255) NULL DEFAULT 'default.png'",
+    ];
+    try {
+        $rows = db()->fetchAll(
+            "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'students'"
+        );
+        if (!$rows) return;   // table missing or no access: nothing to do
+        $have = array_map('strtolower', array_column($rows, 'COLUMN_NAME'));
+        foreach ($want as $col => $def) {
+            if (!in_array($col, $have, true)) {
+                db()->query("ALTER TABLE students ADD COLUMN `$col` $def");
+            }
+        }
+    } catch (\Throwable $e) {
+        // never break the page because of the self-check
+    }
+}
+
 function sanitize(string $input): string {
     return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }

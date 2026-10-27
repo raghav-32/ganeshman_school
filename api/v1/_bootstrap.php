@@ -234,6 +234,7 @@ function api_auth(string ...$roles): array {
     $p = db()->fetchOne("SELECT id, CONCAT(first_name,' ',last_name) AS name FROM $table WHERE user_id=?", 'i', [$row['user_id']]);
     if (!$p) api_fail(403, 'No ' . $row['role'] . ' profile is linked to this account.');
 
+    ensureStudentColumns();
     return [
         'token_id' => (int)$row['token_id'],
         'user_id'  => (int)$row['user_id'],
