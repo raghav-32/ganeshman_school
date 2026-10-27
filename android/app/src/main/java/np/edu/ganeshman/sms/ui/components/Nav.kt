@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,8 +32,8 @@ fun PillNav(items: List<NavItem>, selected: String, onSelect: (String) -> Unit, 
             .shadow(10.dp, CircleShape, ambientColor = Color(0x22000000), spotColor = Color(0x22000000))
             .clip(CircleShape)
             .background(Surface)
-            .padding(horizontal = 6.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         items.forEach { item ->
@@ -43,17 +44,17 @@ fun PillNav(items: List<NavItem>, selected: String, onSelect: (String) -> Unit, 
                     .clip(CircleShape)
                     .background(bg)
                     .clickable { onSelect(item.route) }
-                    .padding(horizontal = 10.dp, vertical = 11.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(item.icon, item.label, tint = if (on) BrandDark else InkSoft, modifier = Modifier.size(22.dp))
+                Icon(item.icon, item.label, tint = if (on) BrandDark else InkSoft, modifier = Modifier.size(24.dp))
                 AnimatedVisibility(on, enter = expandHorizontally(), exit = shrinkHorizontally()) {
                     Text(
                         item.label,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = BrandDark,
                         maxLines = 1,
-                        modifier = Modifier.padding(start = 6.dp),
+                        modifier = Modifier.padding(start = 8.dp),
                     )
                 }
             }
@@ -88,6 +89,11 @@ fun FabEffect(spec: FabSpec?) {
 @Composable
 fun AppFab(spec: FabSpec, modifier: Modifier = Modifier) {
     val rot by animateFloatAsState(if (spec.rotated) 45f else 0f, label = "rot")
+    // gentle pop-in whenever the button appears
+    val pop = remember { androidx.compose.animation.core.Animatable(0.6f) }
+    LaunchedEffect(Unit) { pop.animateTo(1f, androidx.compose.animation.core.tween(220)) }
+    @Suppress("NAME_SHADOWING")
+    val modifier = modifier.graphicsLayer { scaleX = pop.value; scaleY = pop.value; alpha = pop.value.coerceIn(0f, 1f) }
     if (spec.label != null) {
         ExtendedFloatingActionButton(
             onClick = { if (!spec.loading) spec.onClick() },

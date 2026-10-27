@@ -47,9 +47,6 @@ import np.edu.ganeshman.sms.ui.theme.*
 /** When set (top-level screens), a round profile picture is shown at the top right, like Gmail. */
 val LocalOpenProfile = staticCompositionLocalOf<(() -> Unit)?> { null }
 
-/** Opens Settings from the gear at the top right. */
-val LocalOpenSettings = staticCompositionLocalOf<(() -> Unit)?> { null }
-
 /** Opens the global search from the magnifier in the top bar. */
 val LocalOpenSearch = staticCompositionLocalOf<(() -> Unit)?> { null }
 
@@ -99,7 +96,6 @@ fun Screen(
             }
             actions()
             val openSearch = LocalOpenSearch.current
-            val openSettings = LocalOpenSettings.current
             val openNotices = LocalOpenNotices.current
             val openProfile = LocalOpenProfile.current
             if (onBack == null && openSearch != null) {
@@ -124,15 +120,9 @@ fun Screen(
             }
             if (onBack == null && openProfile != null) {
                 val me by np.edu.ganeshman.sms.ui.common.LocalRepo.current.session.data.collectAsState()
-                Box(Modifier.padding(horizontal = 2.dp).clip(CircleShape).clickable(onClick = openProfile)) {
-                    Avatar(me?.profile?.fullName ?: "", me?.profile?.photoUrl, 34.dp)
+                Box(Modifier.padding(start = 4.dp).clip(CircleShape).clickable(onClick = openProfile)) {
+                    Avatar(me?.profile?.fullName ?: "", me?.profile?.photoUrl, 40.dp)
                 }
-            }
-            if (onBack == null && openSettings != null) {
-                Box(
-                    Modifier.size(40.dp).clip(CircleShape).clickable(onClick = openSettings),
-                    contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Ink) }
             }
         }
 

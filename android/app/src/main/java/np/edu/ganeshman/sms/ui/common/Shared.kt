@@ -37,7 +37,12 @@ fun ProfileScreen(onBack: () -> Unit, onSettings: () -> Unit = {}) {
     var signOut by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    Screen("Profile", onBack = onBack) {
+    Screen(
+        "Profile", onBack = onBack,
+        actions = {
+            IconButton(onClick = onSettings) { Icon(Icons.Outlined.Settings, contentDescription = "Settings") }
+        },
+    ) {
         AsyncContent(state) { p ->
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Avatar(p.fullName, p.photoUrl, 96.dp)
@@ -65,7 +70,6 @@ fun ProfileScreen(onBack: () -> Unit, onSettings: () -> Unit = {}) {
                 InfoRow(Icons.Outlined.FamilyRestroom, "Relation", p.guardianRelation)
             }
             BigButton("Change password", { pwOpen = true }, outlined = true)
-            BigButton("Settings", onSettings, outlined = true)
             Panel(color = PastelPink, onClick = { signOut = true }, padding = 16.dp) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     Icon(Icons.AutoMirrored.Outlined.Logout, null, tint = OnPink)

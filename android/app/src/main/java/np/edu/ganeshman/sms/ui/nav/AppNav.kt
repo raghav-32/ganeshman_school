@@ -13,6 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -112,16 +117,21 @@ fun AppRoot() {
         { nav.navigate(if (sd.isStudent) Routes.S_NOTICES else Routes.T_NOTICES) { launchSingleTop = true } }
     }
 
-    val openSettings: (() -> Unit)? = session?.let { { nav.navigate(Routes.SETTINGS) { launchSingleTop = true } } }
     val openSearch: (() -> Unit)? = session?.let { { nav.navigate(Routes.SEARCH) { launchSingleTop = true } } }
 
     CompositionLocalProvider(
         LocalFabHost provides fabHost, LocalOpenProfile provides openProfile,
         LocalOpenNotices provides openNotices, LocalOpenSearch provides openSearch,
-        LocalOpenSettings provides openSettings,
     ) {
         Box(Modifier.fillMaxSize()) {
-            NavHost(nav, startDestination = start) {
+            NavHost(
+                nav, startDestination = start,
+                // light, cheap transitions: short fade + small slide
+                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(240)) { it / 12 } },
+                exitTransition = { fadeOut(tween(160)) },
+                popEnterTransition = { fadeIn(tween(220)) },
+                popExitTransition = { fadeOut(tween(160)) + slideOutHorizontally(tween(220)) { it / 12 } },
+            ) {
                 composable(Routes.LOGIN) {
                     LoginScreen(
                         onLoggedIn = { student ->
@@ -184,42 +194,38 @@ fun AppRoot() {
             val s = session
             if (s != null && route != null && route !in authRoutes) {
                 val tabs = if (s.isStudent) studentTabs else teacherTabs
-                val spec = fabHost.spec
-                // Navigation pill bottom-left; the round plus button sits on the same row, bottom-right.
-                Row(
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(start = 14.dp, end = 18.dp, bottom = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    PillNav(
-                        tabs, tabFor(route, s.isStudent),
-                        onSelect = { target -> goTab(nav, target, tabs.first().route) },
-                    )
-                    Spacer(Modifier.weight(1f))
-                    if (spec != null && spec.label == null) AppFab(spec)
-                }
-                // Wide "Save" buttons (attendance / marks) don't fit beside the nav: float them just above it.
-                if (spec != null && spec.label != null) {
+                fabHost.spec?.let { spec ->
                     AppFab(
                         spec,
                         Modifier
                             .align(Alignment.BottomEnd)
                             .navigationBarsPadding()
-                            .padding(end = 18.dp, bottom = 88.dp),
+                            .padding(end = 20.dp, bottom = 92.dp),
                     )
                 }
+                PillNav(
+                    tabs, tabFor(route, s.isStudent),
+                    onSelect = { target -> goTab(nav, target, tabs.first().route) },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(bottom = 12.dp),
+                )
             }
         }
     }
 }
 
 private fun goTab(nav: NavHostController, target: String, home: String) {
-    nav.navigate(target) {
-        popUpTo(home) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
+    if (target == home) {
+        // Always land on Home, whatever screen is open (Settings, a detail page, another tab...).
+        if (!nav.popBackStack(home, inclusive = false)) {
+            nav.navigate(home) { launchSingleTop = true }
+        }
+    } else {
+        nav.navigate(target) {
+            popUpTo(home) { inclusive = false }
+            launchSingleTop = true
+        }
     }
 }
