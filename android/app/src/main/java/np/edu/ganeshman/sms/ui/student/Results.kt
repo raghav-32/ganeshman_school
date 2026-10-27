@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import np.edu.ganeshman.sms.ui.common.LocalRepo
 import np.edu.ganeshman.sms.ui.common.prettyDate
 import np.edu.ganeshman.sms.ui.components.*
