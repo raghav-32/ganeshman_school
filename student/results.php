@@ -107,9 +107,6 @@ require_once '../includes/student_header.php';
             <button onclick="openMyMarksheet()" class="btn btn-primary btn-sm">
                 <i class="fas fa-file-alt"></i> View Marksheet
             </button>
-            <button onclick="printSection('resultCard')" class="btn btn-outline btn-sm">
-                <i class="fas fa-print"></i> Print
-            </button>
         </div>
     </div>
     <div class="card-body" style="padding:0;">
