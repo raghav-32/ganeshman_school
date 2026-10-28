@@ -199,7 +199,7 @@ fun MarksheetScreen(examId: Int, onBack: () -> Unit) {
             }) { Icon(Icons.Outlined.Print, "Print or save as PDF") }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            Box(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+            Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
                 AsyncContent(state) { r ->
                     val html = remember(r, me) {
                         marksheetHtml(
@@ -208,7 +208,7 @@ fun MarksheetScreen(examId: Int, onBack: () -> Unit) {
                         )
                     }
                     AndroidView(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
                         factory = { c ->
                             WebView(c).apply {
                                 settings.javaScriptEnabled = false
