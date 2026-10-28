@@ -50,7 +50,7 @@ require_once '../includes/teacher_header.php';
             Welcome, <?= htmlspecialchars($teacher['first_name'] ?? $user['name']) ?>!
         </h2>
         <p style="opacity:0.85;font-size:0.88rem;">
-            Teacher ID: <?= htmlspecialchars($teacher['teacher_id'] ?? '–') ?> &bull; <?= date('D, d F Y') ?>
+            Teacher ID: <?= htmlspecialchars($teacher['teacher_id'] ?? '–') ?> &bull; <?= date('D') ?>, <?= NepaliDate::today() ?>
         </p>
     </div>
     <div style="text-align:right;">

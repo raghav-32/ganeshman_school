@@ -267,7 +267,7 @@ require_once '../includes/admin_header.php';
                         </div>
                     </td>
                     <td><?= htmlspecialchars($reg['class_name'] . ' – ' . $reg['section']) ?></td>
-                    <td><?= htmlspecialchars($reg['dob'] ?: '–') ?></td>
+                    <td><?= formatDate((string)$reg['dob']) ?></td>
                     <td style="font-size:0.78rem;color:#64748b;"><?= formatDateTime($reg['submitted_at']) ?></td>
                     <td>
                         <span class="status-pill pill-<?= $reg['status'] ?>">
@@ -305,7 +305,7 @@ require_once '../includes/admin_header.php';
                             <div class="detail-item"><label>Guardian Name</label><span><?= htmlspecialchars($reg['guardian_name']) ?></span></div>
                             <div class="detail-item"><label>Guardian Phone</label><span><?= htmlspecialchars($reg['guardian_phone']) ?></span></div>
                             <div class="detail-item"><label>Guardian Relation</label><span><?= htmlspecialchars($reg['guardian_relation'] ?: '–') ?></span></div>
-                            <div class="detail-item"><label>Admission Date</label><span><?= htmlspecialchars($reg['admission_date'] ?: 'Not specified') ?></span></div>
+                            <div class="detail-item"><label>Admission Date</label><span><?= $reg['admission_date'] ? formatDate((string)$reg['admission_date']) : 'Not specified' ?></span></div>
                         </div>
                     </td>
                 </tr>

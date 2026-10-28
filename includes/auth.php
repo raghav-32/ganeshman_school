@@ -361,6 +361,10 @@ class NepaliDate {
         return self::$bsStartYear;
     }
 
+    public static function daysInMonth(int $bsYear, int $bsMonth): int {
+        return self::$bsMonthData[$bsYear - self::$bsStartYear][$bsMonth - 1] ?? 30;
+    }
+
     // AD reference: 1943 April 14 = BS 2000 Baisakh 1.
     // Cross-checked against whitphx/nepali-calendar-js's own declared epoch
     // (Julian Day 2430829 = 14 April 1943) and against the fact that BS New

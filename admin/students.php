@@ -395,18 +395,18 @@ include '../includes/admin_header.php';
                         <div style="font-size:0.72rem;color:var(--text-secondary);"><i class="fas fa-at" style="font-size:0.65rem;"></i> <?= htmlspecialchars($reg['username']) ?></div>
                         <button class="detail-expand" onclick="toggleDetail(<?= $i ?>)"><i class="fas fa-chevron-down" id="dicon-<?= $i ?>"></i> View details</button>
                         <div class="detail-box" id="dbox-<?= $i ?>">
-                            <b>DOB:</b> <?= htmlspecialchars($reg['dob']) ?> &nbsp;|&nbsp;
+                            <b>DOB:</b> <?= formatDate((string)$reg['dob']) ?> &nbsp;|&nbsp;
                             <b>Gender:</b> <?= htmlspecialchars($reg['gender']) ?> &nbsp;|&nbsp;
                             <b>Phone:</b> <?= htmlspecialchars($reg['phone']) ?> &nbsp;|&nbsp;
                             <b>Email:</b> <?= htmlspecialchars($reg['email'] ?: '–') ?><br>
                             <b>Address:</b> <?= htmlspecialchars($reg['address']) ?><br>
                             <b>Guardian:</b> <?= htmlspecialchars($reg['guardian_name']) ?> (<?= htmlspecialchars($reg['guardian_phone']) ?>)
                             <?php if ($reg['guardian_relation']): ?> — <?= htmlspecialchars($reg['guardian_relation']) ?><?php endif; ?>
-                            <?php if ($reg['admission_date']): ?><br><b>Admission Date:</b> <?= htmlspecialchars($reg['admission_date']) ?><?php endif; ?>
+                            <?php if ($reg['admission_date']): ?><br><b>Admission Date:</b> <?= formatDate((string)$reg['admission_date']) ?><?php endif; ?>
                         </div>
                     </td>
                     <td><?= htmlspecialchars(($reg['class_name']??'–').' '.($reg['section']??'')) ?></td>
-                    <td style="font-size:0.78rem;color:var(--text-secondary);"><?= date('d M Y', strtotime($reg['submitted_at'])) ?><br><?= date('g:i A', strtotime($reg['submitted_at'])) ?></td>
+                    <td style="font-size:0.78rem;color:var(--text-secondary);"><?= formatDate(substr($reg['submitted_at'], 0, 10)) ?><br><?= date('g:i A', strtotime($reg['submitted_at'])) ?></td>
                     <td><span class="pr-pill pill-<?= $reg['status'] ?>"><i class="fas fa-<?= $reg['status']==='pending'?'clock':($reg['status']==='approved'?'check':'times') ?>"></i> <?= ucfirst($reg['status']) ?></span></td>
                     <td>
                         <?php if ($reg['status'] === 'pending'): ?>
@@ -423,7 +423,7 @@ include '../includes/admin_header.php';
                             </form>
                         </div>
                         <?php else: ?>
-                        <span style="font-size:0.75rem;color:var(--text-light);">Reviewed<br><?= $reg['reviewed_at'] ? date('d M Y', strtotime($reg['reviewed_at'])) : '' ?></span>
+                        <span style="font-size:0.75rem;color:var(--text-light);">Reviewed<br><?= $reg['reviewed_at'] ? formatDate(substr($reg['reviewed_at'], 0, 10)) : '' ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>

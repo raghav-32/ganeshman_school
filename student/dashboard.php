@@ -63,7 +63,7 @@ require_once '../includes/student_header.php';
         <p style="opacity:0.85;font-size:0.90rem;">
             <?= htmlspecialchars($student['class_name'].' '.$student['section']) ?> &nbsp;•&nbsp;
             ID: <?= htmlspecialchars($student['student_id']) ?> &nbsp;•&nbsp;
-            <?= date('D, d F Y') ?>
+            <?= date('D') ?>, <?= NepaliDate::today() ?>
         </p>
     </div>
     <div style="text-align:right;">

@@ -396,7 +396,7 @@ $notifNotices = db()->fetchAll("
                     </div>
                     <div class="nr-b">
                         <h4><?= htmlspecialchars($n['title']) ?></h4>
-                        <p><?= date('d M Y',strtotime($n['created_at'])) ?> · <?= htmlspecialchars($n['author_name']) ?>
+                        <p><?= formatDate(substr($n['created_at'], 0, 10)) ?> · <?= htmlspecialchars($n['author_name']) ?>
                         <?php if($pinned): ?> <span class="pinned-badge"><i class="fas fa-thumbtack"></i> Pinned</span><?php endif; ?>
                         </p>
                     </div>
@@ -445,7 +445,7 @@ $notifNotices = db()->fetchAll("
                     <div class="nr-b">
                         <h4><?= htmlspecialchars($n['title']) ?></h4>
                         <p style="margin-bottom:3px;"><?= htmlspecialchars(mb_substr(strip_tags($n['content']),0,80)) ?>…</p>
-                        <p><?= date('d M Y',strtotime($n['created_at'])) ?></p>
+                        <p><?= formatDate(substr($n['created_at'], 0, 10)) ?></p>
                     </div>
                     <div class="nr-a">
                         <form method="POST">

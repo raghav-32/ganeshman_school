@@ -7,7 +7,13 @@ $activeMenu = 'attendance';
 $user       = currentUser();
 $studentId  = $user['ref_id'];
 
-$filterMonth = sanitize($_GET['month'] ?? date('Y-m'));
+$bsMonthNames = ['','Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin','Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'];
+$todayBs = NepaliDate::adToBs(date('Y-m-d'));
+$bsYear  = max(NepaliDate::startYear(), (int)($_GET['bsy'] ?? $todayBs[0]));
+$bsMonth = min(12, max(1, (int)($_GET['bsm'] ?? $todayBs[1])));
+$bsDays  = NepaliDate::daysInMonth($bsYear, $bsMonth);
+$adFrom  = NepaliDate::bsToAd($bsYear, $bsMonth, 1);
+$adTo    = NepaliDate::bsToAd($bsYear, $bsMonth, $bsDays);
 
 // Overall summary
 $summary = db()->fetchOne("
@@ -22,9 +28,14 @@ $pct = ($summary['total'] > 0) ? round(($summary['present']/$summary['total'])*1
 // Monthly records
 $records = db()->fetchAll("
     SELECT * FROM attendance
-    WHERE student_id = ? AND DATE_FORMAT(attendance_date, '%Y-%m') = ?
+    WHERE student_id = ? AND attendance_date BETWEEN ? AND ?
     ORDER BY attendance_date DESC
-", 'is', [$studentId, $filterMonth]);
+", 'iss', [$studentId, $adFrom, $adTo]);
+$byDay = [];
+foreach ($records as $r) { $b = NepaliDate::adToBs($r['attendance_date']); $byDay[$b[2]] = $r['status']; }
+$prevM = $bsMonth - 1; $prevY = $bsYear; if ($prevM < 1)  { $prevM = 12; $prevY--; }
+$nextM = $bsMonth + 1; $nextY = $bsYear; if ($nextM > 12) { $nextM = 1;  $nextY++; }
+$lead  = (int)date('w', strtotime($adFrom));   // Sunday = 0
 
 require_once '../includes/student_header.php';
 ?>
@@ -75,12 +86,44 @@ require_once '../includes/student_header.php';
 <div class="card">
     <div class="card-header">
         <h3><i class="fas fa-calendar-check"></i> Monthly Records</h3>
-        <form method="GET" style="display:flex;gap:8px;align-items:center;">
-            <input type="month" name="month" class="form-control" value="<?= $filterMonth ?>" style="width:auto;">
+        <form method="GET" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <a class="btn btn-sm btn-outline" href="?bsy=<?= $prevY ?>&bsm=<?= $prevM ?>" title="Previous month">&#8249;</a>
+            <select name="bsm" class="form-control" style="width:auto;">
+                <?php for ($m = 1; $m <= 12; $m++): ?>
+                <option value="<?= $m ?>" <?= $m === $bsMonth ? 'selected' : '' ?>><?= $bsMonthNames[$m] ?></option>
+                <?php endfor; ?>
+            </select>
+            <select name="bsy" class="form-control" style="width:auto;">
+                <?php for ($y = $todayBs[0]; $y >= max(NepaliDate::startYear(), $todayBs[0] - 12); $y--): ?>
+                <option value="<?= $y ?>" <?= $y === $bsYear ? 'selected' : '' ?>><?= $y ?></option>
+                <?php endfor; ?>
+            </select>
             <button type="submit" class="btn btn-primary btn-sm">Go</button>
+            <a class="btn btn-sm btn-outline" href="?bsy=<?= $nextY ?>&bsm=<?= $nextM ?>" title="Next month">&#8250;</a>
         </form>
     </div>
-    <div class="card-body" style="padding:0;">
+    <div class="card-body" style="padding:16px 20px;">
+        <style>
+        .att-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:420px;margin:0 auto;text-align:center;}
+        .att-cal .h{font-size:.72rem;font-weight:700;color:var(--text-secondary);padding:4px 0;}
+        .att-cal .d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.85rem;color:var(--text-primary);}
+        .att-cal .d.Present{background:#dcfce7;color:#166534;font-weight:700;}
+        .att-cal .d.Absent{background:#fee2e2;color:#991b1b;font-weight:700;}
+        .att-cal .d.Late{background:#fef9c3;color:#854d0e;font-weight:700;}
+        .att-cal .d.Leave{background:#dbeafe;color:#1e40af;font-weight:700;}
+        .att-cal .d.today{outline:2px solid var(--primary-light,#2563a8);}
+        </style>
+        <div style="text-align:center;font-weight:700;margin-bottom:10px;"><?= $bsMonthNames[$bsMonth] ?> <?= $bsYear ?></div>
+        <div class="att-cal">
+            <?php foreach (['S','M','T','W','T','F','S'] as $h): ?><div class="h"><?= $h ?></div><?php endforeach; ?>
+            <?php for ($i = 0; $i < $lead; $i++): ?><div></div><?php endfor; ?>
+            <?php for ($d = 1; $d <= $bsDays; $d++):
+                $isToday = ($bsYear === $todayBs[0] && $bsMonth === $todayBs[1] && $d === $todayBs[2]); ?>
+            <div class="d <?= $byDay[$d] ?? '' ?> <?= $isToday ? 'today' : '' ?>"><?= $d ?></div>
+            <?php endfor; ?>
+        </div>
+    </div>
+    <div class="card-body" style="padding:0;border-top:1px solid var(--border,#e5e7eb);">
         <div class="table-responsive">
             <table class="table">
                 <thead>
@@ -91,7 +134,7 @@ require_once '../includes/student_header.php';
                     <tr><td colspan="4">
                         <div class="empty-state" style="padding:24px;">
                             <i class="fas fa-calendar-times"></i>
-                            <p>No attendance records for <?= NepaliDate::format($filterMonth.'-01') ?>.</p>
+                            <p>No attendance records for <?= $bsMonthNames[$bsMonth] . ' ' . $bsYear ?>.</p>
                         </div>
                     </td></tr>
                     <?php else: ?>

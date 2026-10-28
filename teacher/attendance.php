@@ -63,7 +63,7 @@ require_once '../includes/teacher_header.php';
 <div class="card" style="margin-bottom:22px;">
     <div class="card-header">
         <h3><i class="fas fa-clipboard-check"></i> Mark Attendance</h3>
-        <span class="badge badge-info"><?= date('D, d M Y', strtotime($selectedDate)) ?></span>
+        <span class="badge badge-info"><?= formatDateFull($selectedDate) ?></span>
     </div>
     <div class="card-body">
         <!-- Filters -->
@@ -81,7 +81,7 @@ require_once '../includes/teacher_header.php';
             </div>
             <div class="form-group" style="margin-bottom:0;">
                 <label>Date</label>
-                <input type="date" name="date" class="form-control" value="<?= $selectedDate ?>" max="<?= date('Y-m-d') ?>">
+                <?= bsDatePicker('date', $selectedDate, true) ?>
             </div>
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-filter"></i> Load

@@ -458,7 +458,7 @@ footer{background:var(--dark);color:#c7ccd4;padding:44px 20px 20px}
       <?php foreach($notices as $n):
         $snippet  = mb_substr(strip_tags($n['content']), 0, 160);
         $hasMore  = mb_strlen(strip_tags($n['content'])) > 160;
-        $dateStr  = date('d M Y', strtotime($n['created_at']));
+        $dateStr  = formatDate(substr($n['created_at'], 0, 10));
         $target   = ucfirst($n['target_role']);
         $safeData = htmlspecialchars(json_encode([
           'title'   => $n['title'],
