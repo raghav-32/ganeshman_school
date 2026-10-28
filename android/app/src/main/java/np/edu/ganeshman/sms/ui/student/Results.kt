@@ -13,7 +13,7 @@ import np.edu.ganeshman.sms.ui.components.*
 import np.edu.ganeshman.sms.ui.theme.*
 
 @Composable
-fun ResultsScreen(onOpen: (Int) -> Unit, onBack: (() -> Unit)? = null) {
+fun ResultsScreen(onOpen: (Int) -> Unit, onMarksheet: (Int) -> Unit, onBack: (() -> Unit)? = null) {
     val repo = LocalRepo.current
     val state = rememberAsync { repo.results() }
     var filter by remember { mutableStateOf("All") }
@@ -39,6 +39,10 @@ fun ResultsScreen(onOpen: (Int) -> Unit, onBack: (() -> Unit)? = null) {
                     Bar((r.percentage / 100).toFloat(), pctColor(r.percentage))
                     Text("${num(r.totalObtained)} / ${num(r.totalFull)} • ${r.subjectCount} subjects",
                         style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                    androidx.compose.material3.TextButton(
+                        onClick = { onMarksheet(r.examId) },
+                        contentPadding = PaddingValues(horizontal = 0.dp),
+                    ) { Text("View marksheet", color = BrandDark) }
                 }
             }
         }
@@ -46,7 +50,7 @@ fun ResultsScreen(onOpen: (Int) -> Unit, onBack: (() -> Unit)? = null) {
 }
 
 @Composable
-fun ResultDetailScreen(examId: Int, onBack: () -> Unit) {
+fun ResultDetailScreen(examId: Int, onBack: () -> Unit, onMarksheet: () -> Unit = {}) {
     val repo = LocalRepo.current
     val state = rememberAsync(examId) { repo.resultDetail(examId) }
     Screen("Result", onBack = onBack) {
@@ -64,6 +68,7 @@ fun ResultDetailScreen(examId: Int, onBack: () -> Unit) {
                     }
                 }
             }
+            BigButton("View marksheet", onMarksheet, outlined = true)
             SectionTitle("Subjects")
             r.subjects.forEach { s ->
                 Panel {

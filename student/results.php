@@ -8,7 +8,7 @@ $user       = currentUser();
 $studentId  = $user['ref_id'];
 
 // Get student's class
-$student = db()->fetchOne("SELECT class_id FROM students WHERE id=?", 'i', [$studentId]);
+$student = db()->fetchOne("SELECT s.class_id, s.first_name, s.last_name, s.student_id, c.class_name, c.section FROM students s LEFT JOIN classes c ON s.class_id=c.id WHERE s.id=?", 'i', [$studentId]);
 $classId = (int)($student['class_id'] ?? 0);
 
 // Only show exams for THIS student's class
@@ -40,6 +40,10 @@ if ($selectedExamId) {
         ORDER BY sub.subject_name
     ", 'ii', [$selectedExamId, $studentId]);
 }
+
+$classSubjects = $classId ? db()->fetchAll(
+    "SELECT id, subject_name, full_marks, pass_marks FROM subjects WHERE class_id=? ORDER BY subject_name", 'i', [$classId]
+) : [];
 
 require_once '../includes/student_header.php';
 ?>
@@ -99,9 +103,14 @@ require_once '../includes/student_header.php';
 <div class="card" id="resultCard">
     <div class="card-header">
         <h3><i class="fas fa-table"></i> Subject-wise Result</h3>
-        <button onclick="printSection('resultCard')" class="btn btn-outline btn-sm no-print">
-            <i class="fas fa-print"></i> Print
-        </button>
+        <div style="display:flex;gap:8px;" class="no-print">
+            <button onclick="openMyMarksheet()" class="btn btn-primary btn-sm">
+                <i class="fas fa-file-alt"></i> View Marksheet
+            </button>
+            <button onclick="printSection('resultCard')" class="btn btn-outline btn-sm">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
     </div>
     <div class="card-body" style="padding:0;">
         <div class="table-responsive">
@@ -173,6 +182,26 @@ require_once '../includes/student_header.php';
     <p>Marks for this exam have not been entered yet.</p>
 </div>
 <?php endif; ?>
+<?php endif; ?>
+
+<?php if ($selectedExamId && !empty($details)): ?>
+<script src="../assets/js/marksheet.js?v=1"></script>
+<script>
+function openMyMarksheet() {
+    gmsOpenMarksheet(
+        <?= json_encode(['first_name'=>$student['first_name'] ?? '', 'last_name'=>$student['last_name'] ?? '', 'student_id'=>$student['student_id'] ?? '', 'class_name'=>$student['class_name'] ?? '', 'section'=>$student['section'] ?? '']) ?>,
+        <?= json_encode(array_map(fn($d) => ['subject_id'=>(int)$d['subject_id'], 'marks_obtained'=>$d['marks_obtained']], $details)) ?>,
+        <?= json_encode($classSubjects) ?>,
+        {
+            examName:  <?= json_encode($selExam['exam_name'] ?? '') ?>,
+            examType:  <?= json_encode($selExam['exam_type'] ?? '') ?>,
+            examDate:  <?= json_encode(formatDate($selExam['start_date'] ?? '')) ?>,
+            printedOn: <?= json_encode(formatDate(date('Y-m-d'))) ?>,
+            logo:      new URL('../assets/images/gms.png', location.href).href
+        }
+    );
+}
+</script>
 <?php endif; ?>
 
 <?php require_once '../includes/student_footer.php'; ?>

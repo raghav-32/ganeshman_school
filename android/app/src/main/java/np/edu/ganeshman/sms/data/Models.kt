@@ -187,6 +187,7 @@ data class ResultDetail(
     val examId: Int = 0,
     val examName: String = "",
     val examType: String = "",
+    val startDate: String? = null,
     val startDateBs: String? = null,
     @SerialName("class") val klass: ClassRef? = null,
     val subjects: List<SubjectResult> = emptyList(),

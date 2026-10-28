@@ -21,6 +21,7 @@ object Routes {
     const val S_RESULTS = "s/results"
     const val S_MORE = "s/more"
     const val S_RESULT = "s/result/{id}"
+    const val S_MARKSHEET = "s/marksheet/{id}"
     const val S_TIMETABLE = "s/timetable"
     const val S_EXAMS = "s/exams"
     const val S_FEES = "s/fees"
@@ -38,6 +39,7 @@ object Routes {
     const val T_PROFILE = "t/profile"
 
     fun result(id: Int) = "s/result/$id"
+    fun marksheet(id: Int) = "s/marksheet/$id"
     fun entry(examId: Int) = "t/marks/$examId"
 }
 

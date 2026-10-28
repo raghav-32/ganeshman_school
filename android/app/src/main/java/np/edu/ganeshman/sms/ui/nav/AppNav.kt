@@ -157,12 +157,25 @@ fun AppRoot() {
                 // ---------------- student ----------------
                 composable(Routes.S_HOME) { StudentHome(nav) }
                 composable(Routes.S_ATT) { StudentAttendanceScreen() }
-                composable(Routes.S_RESULTS) { ResultsScreen(onOpen = { nav.navigate(Routes.result(it)) }, onBack = { nav.popBackStack() }) }
+                composable(Routes.S_RESULTS) {
+                    ResultsScreen(
+                        onOpen = { nav.navigate(Routes.result(it)) },
+                        onMarksheet = { nav.navigate(Routes.marksheet(it)) },
+                        onBack = { nav.popBackStack() },
+                    )
+                }
                 composable(Routes.S_MORE) { StudentMore(nav) }
                 composable(
                     Routes.S_RESULT,
                     arguments = listOf(navArgument("id") { type = NavType.IntType }),
-                ) { e -> ResultDetailScreen(e.arguments?.getInt("id") ?: 0, onBack = { nav.popBackStack() }) }
+                ) { e ->
+                    val id = e.arguments?.getInt("id") ?: 0
+                    ResultDetailScreen(id, onBack = { nav.popBackStack() }, onMarksheet = { nav.navigate(Routes.marksheet(id)) })
+                }
+                composable(
+                    Routes.S_MARKSHEET,
+                    arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                ) { e -> MarksheetScreen(e.arguments?.getInt("id") ?: 0, onBack = { nav.popBackStack() }) }
                 composable(Routes.S_TIMETABLE) { TimetableScreen() }
                 composable(Routes.S_EXAMS) { ExamsScreen(onBack = { nav.popBackStack() }) }
                 composable(Routes.S_FEES) { FeesScreen(onBack = { nav.popBackStack() }) }
@@ -192,7 +205,7 @@ fun AppRoot() {
             }
 
             val s = session
-            if (s != null && route != null && route !in authRoutes) {
+            if (s != null && route != null && route !in authRoutes && route != Routes.S_MARKSHEET) {
                 val tabs = if (s.isStudent) studentTabs else teacherTabs
                 fabHost.spec?.let { spec ->
                     AppFab(
