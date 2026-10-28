@@ -268,6 +268,7 @@ include '../includes/admin_header.php';
 <style>
 .req-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:visible;}
 .req-card:has(.bsdp-popup.open){position:relative;z-index:50;}
+.card:has(.bsdp-popup.open){overflow:visible;}
 .req-card-head{border-radius:var(--radius) var(--radius) 0 0;}
 .req-card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#fffbeb;border-bottom:1.5px solid #fef3c7;}
 .req-card-head .req-icon{width:36px;height:36px;border-radius:8px;background:rgba(245,158,11,.15);color:#d97706;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;}
