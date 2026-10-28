@@ -76,7 +76,7 @@ fun ExamsScreen(onBack: () -> Unit) {
                         Column(Modifier.weight(1f)) {
                             Text(e.examName, style = MaterialTheme.typography.titleMedium)
                             Text(
-                                (e.startDateBs ?: prettyDate(e.startDate)) + " – " + (e.endDateBs ?: prettyDate(e.endDate)),
+                                (prettyDate(e.startDate)) + " – " + (prettyDate(e.endDate)),
                                 style = MaterialTheme.typography.bodySmall, color = InkSoft,
                             )
                         }
@@ -87,7 +87,7 @@ fun ExamsScreen(onBack: () -> Unit) {
                             Column(Modifier.weight(1f)) {
                                 Text(s.subjectName, style = MaterialTheme.typography.titleSmall)
                                 Text(
-                                    listOfNotNull(s.dateBs ?: prettyDate(s.date), s.weekday.ifBlank { null },
+                                    listOfNotNull(prettyDate(s.date), s.weekday.ifBlank { null },
                                         s.startTime?.let { hhmm(it) + (s.endTime?.let { e2 -> "–" + hhmm(e2) } ?: "") }).joinToString(" • "),
                                     style = MaterialTheme.typography.bodySmall, color = InkSoft,
                                 )
@@ -142,7 +142,7 @@ fun FeesScreen(onBack: () -> Unit) {
                             Column(Modifier.weight(1f)) {
                                 Text(p.feeType, style = MaterialTheme.typography.titleSmall)
                                 Text(
-                                    listOfNotNull(p.paymentDateBs ?: prettyDate(p.paymentDate), p.receiptNumber).joinToString(" • "),
+                                    listOfNotNull(prettyDate(p.paymentDate), p.receiptNumber).joinToString(" • "),
                                     style = MaterialTheme.typography.bodySmall, color = InkSoft,
                                 )
                             }
@@ -195,7 +195,7 @@ fun LibraryScreen(onBack: () -> Unit) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 Text(b.title, style = MaterialTheme.typography.titleSmall)
-                                Text("Due ${b.dueDateBs ?: prettyDate(b.dueDate)}", style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                                Text("Due ${prettyDate(b.dueDate)}", style = MaterialTheme.typography.bodySmall, color = InkSoft)
                             }
                             if (b.isOverdue) Chip("Fine Rs. ${b.estimatedFine}", PastelPink, OnPink)
                             else Chip("${b.daysLeft}d left", PastelGreen, OnGreen)

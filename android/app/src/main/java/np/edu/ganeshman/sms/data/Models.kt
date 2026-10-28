@@ -382,6 +382,7 @@ data class TeacherExam(
     val examName: String = "",
     val examType: String = "",
     @SerialName("class") val klass: ClassRef = ClassRef(),
+    val startDate: String? = null,
     val startDateBs: String? = null,
     val endDateBs: String? = null,
     val isPublished: Boolean = false,

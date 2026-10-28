@@ -30,7 +30,7 @@ fun ResultsScreen(onOpen: (Int) -> Unit, onBack: (() -> Unit)? = null) {
                         Column(Modifier.weight(1f)) {
                             Text(r.examName, style = MaterialTheme.typography.titleMedium)
                             Text(
-                                listOfNotNull(r.examType.ifBlank { null }, r.startDateBs ?: prettyDate(r.startDate)).joinToString(" • "),
+                                listOfNotNull(r.examType.ifBlank { null }, prettyDate(r.startDate)).joinToString(" • "),
                                 style = MaterialTheme.typography.bodySmall, color = InkSoft,
                             )
                         }

@@ -76,7 +76,7 @@ fun StudentHome(nav: NavHostController) {
                             IconBubble(Icons.Outlined.MenuBook, PastelPeach, OnPeach)
                             Column(Modifier.weight(1f)) {
                                 Text(b.title, style = MaterialTheme.typography.titleSmall)
-                                Text("Due ${b.dueDateBs ?: prettyDate(b.dueDate)}", style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                                Text("Due ${prettyDate(b.dueDate)}", style = MaterialTheme.typography.bodySmall, color = InkSoft)
                             }
                             if (b.isOverdue) Chip("Overdue", PastelPink, OnPink)
                             else Chip("${b.daysLeft}d left", PastelGreen, OnGreen)
@@ -115,7 +115,7 @@ fun NoticeCard(n: Notice, isNew: Boolean = false) {
         )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(Icons.Outlined.CalendarMonth, null, tint = InkSoft, modifier = Modifier.size(14.dp))
-            Text(n.dateBs ?: prettyDate(n.createdAt), style = MaterialTheme.typography.labelSmall, color = InkSoft, modifier = Modifier.weight(1f))
+            Text(prettyDate(n.createdAt), style = MaterialTheme.typography.labelSmall, color = InkSoft, modifier = Modifier.weight(1f))
             Chip(n.audience.replaceFirstChar { it.uppercase() }.ifBlank { "General" }, PastelGreen, OnGreen)
         }
         if (open) coil.compose.AsyncImage(

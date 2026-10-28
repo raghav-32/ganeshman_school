@@ -54,14 +54,14 @@ fun ProfileScreen(onBack: () -> Unit, onSettings: () -> Unit = {}) {
                 InfoRow(Icons.Outlined.AccountCircle, "Username", p.username)
                 InfoRow(Icons.Outlined.School, "Class", p.klass?.label)
                 InfoRow(Icons.Outlined.Badge, "ID", p.code)
-                InfoRow(Icons.Outlined.Cake, "Date of Birth", listOfNotNull(prettyDate(p.dob).ifBlank { null }, p.dobBs?.let { "$it (BS)" }).joinToString("  •  "))
+                InfoRow(Icons.Outlined.Cake, "Date of Birth", prettyDate(p.dob))
                 InfoRow(Icons.Outlined.Wc, "Gender", p.gender)
                 InfoRow(Icons.Outlined.Call, "Contact", p.phone)
                 InfoRow(Icons.Outlined.Email, "Email", p.email)
                 InfoRow(Icons.Outlined.LocationOn, "Address", p.address)
                 InfoRow(Icons.Outlined.WorkspacePremium, "Qualification", p.qualification)
-                InfoRow(Icons.Outlined.Event, "Joined", p.joiningDateBs ?: prettyDate(p.joiningDate))
-                InfoRow(Icons.Outlined.Event, "Admitted", p.admissionDateBs ?: prettyDate(p.admissionDate))
+                InfoRow(Icons.Outlined.Event, "Joined", prettyDate(p.joiningDate))
+                InfoRow(Icons.Outlined.Event, "Admitted", prettyDate(p.admissionDate))
             }
             if (p.isStudent) Panel(padding = 8.dp) {
                 Text("Guardian", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(start = 8.dp, top = 8.dp))

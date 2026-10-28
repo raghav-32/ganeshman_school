@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import np.edu.ganeshman.sms.data.ApiException
 import np.edu.ganeshman.sms.ui.common.LocalRepo
+import np.edu.ganeshman.sms.ui.common.prettyDate
 import np.edu.ganeshman.sms.ui.components.*
 import np.edu.ganeshman.sms.ui.theme.*
 
@@ -30,7 +31,7 @@ fun MarksListScreen(onOpen: (Int) -> Unit) {
                         Column(Modifier.weight(1f)) {
                             Text(e.examName, style = MaterialTheme.typography.titleMedium)
                             Text(
-                                listOfNotNull(e.klass.label.ifBlank { null }, e.startDateBs).joinToString(" • "),
+                                listOfNotNull(e.klass.label.ifBlank { null }, prettyDate(e.startDate)).joinToString(" • "),
                                 style = MaterialTheme.typography.bodySmall, color = InkSoft,
                             )
                         }

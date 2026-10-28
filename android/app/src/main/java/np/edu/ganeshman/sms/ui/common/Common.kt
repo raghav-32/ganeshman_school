@@ -46,11 +46,12 @@ fun today(): String = LocalDate.now().format(iso)
 fun parseDate(s: String): LocalDate = LocalDate.parse(s, iso)
 fun LocalDate.iso(): String = format(iso)
 
-/** "2025-07-03" -> "Jul 3, 2025" */
+/** "2026-10-28" (AD, as stored) -> "Kartik 11, 2083" (BS, same layout as "Oct 28, 2026"). */
 fun prettyDate(s: String?): String {
     if (s.isNullOrBlank()) return ""
     return try {
-        LocalDate.parse(s.take(10)).format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
+        val b = NepaliDate.fromAd(LocalDate.parse(s.take(10))) ?: return s
+        "${NepaliDate.monthNames[b.second - 1]} ${b.third}, ${b.first}"
     } catch (e: Exception) { s }
 }
 

@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Lock
@@ -35,6 +36,8 @@ fun TeacherAttendanceScreen() {
     val classes = rememberAsync { repo.teacherClasses() }
     var classId by remember { mutableStateOf<Int?>(null) }
     var date by remember { mutableStateOf(LocalDate.now()) }
+    var pickDate by remember { mutableStateOf(false) }
+    if (pickDate) BsDatePickerDialog(date, onDismiss = { pickDate = false }, title = "Attendance date") { date = it; pickDate = false }
     val marks = remember { mutableStateMapOf<Int, String>() }
     var saving by remember { mutableStateOf(false) }
     var msg by remember { mutableStateOf<String?>(null) }
@@ -85,8 +88,17 @@ fun TeacherAttendanceScreen() {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { date = date.minusDays(1) }) { Icon(Icons.Outlined.ChevronLeft, "Previous day") }
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(prettyDate(date.iso()), style = MaterialTheme.typography.titleMedium)
-                    Text(data?.dateBs ?: "", style = MaterialTheme.typography.bodySmall, color = InkSoft)
+                    Row(
+                        Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                            .clickable { pickDate = true }.padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Icon(Icons.Outlined.CalendarMonth, null, Modifier.size(18.dp), tint = BrandDark)
+                        Text(prettyDate(date.iso()), style = MaterialTheme.typography.titleMedium)
+                    }
+                    Text(date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.ENGLISH),
+                        style = MaterialTheme.typography.bodySmall, color = InkSoft)
                 }
                 IconButton(onClick = { date = date.plusDays(1) }, enabled = date.isBefore(LocalDate.now())) {
                     Icon(Icons.Outlined.ChevronRight, "Next day")

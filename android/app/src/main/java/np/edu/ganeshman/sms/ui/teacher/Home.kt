@@ -27,7 +27,7 @@ fun TeacherHome(nav: NavHostController) {
     Screen(
         refresh = state.reload,
         title = if (first.isBlank()) greeting() else "Hi, $first",
-        subtitle = state.load.dataOrNull()?.today?.let { listOfNotNull(it.weekday.ifBlank { null }, it.dateBs).joinToString(" • ") },
+        subtitle = state.load.dataOrNull()?.today?.let { listOfNotNull(it.weekday.ifBlank { null }, prettyDate(it.date).ifBlank { null }).joinToString(" • ") },
     ) {
         AsyncContent(state, skeletons = 4) { d ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
