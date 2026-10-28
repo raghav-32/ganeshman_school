@@ -266,7 +266,9 @@ include '../includes/admin_header.php';
 ?>
 
 <style>
-.req-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.req-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:visible;}
+.req-card:has(.bsdp-popup.open){position:relative;z-index:50;}
+.req-card-head{border-radius:var(--radius) var(--radius) 0 0;}
 .req-card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#fffbeb;border-bottom:1.5px solid #fef3c7;}
 .req-card-head .req-icon{width:36px;height:36px;border-radius:8px;background:rgba(245,158,11,.15);color:#d97706;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;}
 .req-card-head h4{font-size:.9rem;font-weight:800;margin:0;}
@@ -326,7 +328,7 @@ include '../includes/admin_header.php';
                         <input type="hidden" name="student_id" value="<?= $r['s_id'] ?>">
                         <div class="fg">
                             <label>Due Date</label>
-                            <?= bsDatePicker('due_date', date('Y-m-d', strtotime('+14 days')), true) ?>" required>
+                            <?= bsDatePicker('due_date', date('Y-m-d', strtotime('+14 days')), true) ?>
                         </div>
                         <button type="submit" class="btn btn-success"
                             onclick="return confirm('Issue \'<?= htmlspecialchars(addslashes($r['title'])) ?>\' to <?= htmlspecialchars(addslashes($r['student_name'])) ?>?')">
@@ -436,7 +438,7 @@ include '../includes/admin_header.php';
                 </div>
                 <div class="form-group">
                     <label>Due Date *</label>
-                    <?= bsDatePicker('due_date', date('Y-m-d', strtotime('+14 days')), true) ?>" required>
+                    <?= bsDatePicker('due_date', date('Y-m-d', strtotime('+14 days')), true) ?>
                 </div>
                 <button type="submit" class="btn btn-success btn-full">
                     <i class="fas fa-check"></i> Issue Book

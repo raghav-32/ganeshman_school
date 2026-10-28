@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'add') {
         $title   = sanitize($_POST['title'] ?? '');
         $content = sanitize($_POST['content'] ?? '');
-        $target  = sanitize($_POST['target_role'] ?? 'all');
+        $target  = 'all';
         $userId  = currentUser()['id'];
         $image   = handleNoticeImage();
 
@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id      = (int)($_POST['id'] ?? 0);
         $title   = sanitize($_POST['title'] ?? '');
         $content = sanitize($_POST['content'] ?? '');
-        $target  = sanitize($_POST['target_role'] ?? 'all');
         $image   = handleNoticeImage();
 
         if ($image) {
@@ -57,13 +56,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 @unlink('../assets/uploads/notices/' . $old['image']);
             }
             db()->execute(
-                "UPDATE notices SET title=?, content=?, target_role=?, image=? WHERE id=?",
-                'ssssi', [$title, $content, $target, $image, $id]
+                "UPDATE notices SET title=?, content=?, image=? WHERE id=?",
+                'sssi', [$title, $content, $image, $id]
             );
         } else {
             db()->execute(
-                "UPDATE notices SET title=?, content=?, target_role=? WHERE id=?",
-                'sssi', [$title, $content, $target, $id]
+                "UPDATE notices SET title=?, content=? WHERE id=?",
+                'ssi', [$title, $content, $id]
             );
         }
         setFlash('success', 'Notice updated successfully.');
@@ -117,15 +116,6 @@ include '../includes/admin_header.php';
                     <div id="addPreview" style="display:none;margin-top:8px;">
                         <img src="" style="max-height:120px;border-radius:var(--radius-sm);width:100%;object-fit:cover;">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Target Audience</label>
-                    <select name="target_role" class="form-control">
-                        <option value="all">Everyone (All Users)</option>
-                        <option value="student">Students Only</option>
-                        <option value="teacher">Teachers Only</option>
-                        <option value="admin">Admin Only</option>
-                    </select>
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">
                     <i class="fas fa-paper-plane"></i> Post Notice
@@ -229,15 +219,6 @@ include '../includes/admin_header.php';
                         <img src="" style="max-height:100px;border-radius:6px;object-fit:cover;">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Target Audience</label>
-                    <select name="target_role" id="editNoticeTarget" class="form-control">
-                        <option value="all">Everyone</option>
-                        <option value="student">Students Only</option>
-                        <option value="teacher">Teachers Only</option>
-                        <option value="admin">Admin Only</option>
-                    </select>
-                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="Modal.close('editNoticeModal')">Cancel</button>
@@ -252,7 +233,6 @@ function editNotice(n) {
     document.getElementById('editNoticeId').value      = n.id;
     document.getElementById('editNoticeTitle').value   = n.title;
     document.getElementById('editNoticeContent').value = n.content;
-    document.getElementById('editNoticeTarget').value  = n.target_role;
 
     const imgDiv = document.getElementById('editCurrentImage');
     if (n.image) {
